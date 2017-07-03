@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.ac.ut.eHr.mapper.StatMapper">
+
+	<select id="selectApply" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT o.name, ao.*
+		  FROM orgnz o
+		 INNER JOIN (SELECT ao.orgnzid
+							, SUM(IF(ao."level" =1, 1, 0)) AS o1
+							, SUM(IF(ao."level" =2, 1, 0)) AS o2
+							, SUM(IF(ao."level" =3, 1, 0)) AS o3
+							, SUM(IF(ao."level" =4, 1, 0)) AS o4
+							, SUM(IF(ao."level" =5, 1, 0)) AS o5
+							, SUM(IF(ao."level" =6, 1, 0)) AS o6
+							, SUM(IF(ao."level" =7, 1, 0)) AS o7
+							, SUM(IF(ao."level" =8, 1, 0)) AS o8
+							, SUM(IF(ao."level" =9, 1, 0)) AS o9
+							, SUM(IF(ao."level" =10, 1, 0)) AS o10
+							, SUM(IF(ao."level" =11, 1, 0)) AS o11
+							, SUM(IF(ao."level" =12, 1, 0)) AS o12
+							, SUM(IF(ao."level" =13, 1, 0)) AS o13
+							, SUM(IF(ao."level" =14, 1, 0)) AS o14
+							, SUM(IF(ao."level" =15, 1, 0)) AS o15
+							, SUM(IF(ao."level" =16, 1, 0)) AS o16
+					  FROM apply_orgnz ao
+                      <if test="(srchRank != null and srchRank != '') or (srchSpecial != null and srchSpecial != '')">
+                         INNER JOIN [user] u
+                            ON ao.userid = u.userid
+                           <if test="srchRank != null and srchRank != '' ">
+                           AND u.rankcodeid = #{srchRank}
+                           </if>
+                           <if test="srchSpecial != null and srchSpecial != '' ">
+                           AND u.specialDutyCodeId = #{srchSpecial}
+                           </if>
+                      </if>
+					 WHERE ao.psnnlbatchid = #{srchDegree}
+					 GROUP BY ao.orgnzid
+					 ) ao
+			ON o.orgnzid = ao.orgnzid
+		WHERE o.applorgnzyn = 'Y'
+        <if test="srchOrgnz != null and srchOrgnz != ''">AND o.orgnzid = #{srchOrgnz}</if>
+
+        ORDER BY o.name
+	</select>
+
+	<select id="selectIn" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT o.name, ao.*
+		  FROM orgnz o
+		 INNER JOIN (SELECT ao.orgnzid
+                			, (CAST (min(IF(ao."level" =1, p.disstsflevel, NULL)) AS varchar)) AS o1
+                			, (CAST (min(IF(ao."level" =2, p.disstsflevel, NULL)) AS varchar)) AS o2
+                			, (CAST (min(IF(ao."level" =3, p.disstsflevel, NULL)) AS varchar)) AS o3
+                			, (CAST (min(IF(ao."level" =4, p.disstsflevel, NULL)) AS varchar)) AS o4
+                			, (CAST (min(IF(ao."level" =5, p.disstsflevel, NULL)) AS varchar)) AS o5
+                			, (CAST (min(IF(ao."level" =6, p.disstsflevel, NULL)) AS varchar)) AS o6
+                			, (CAST (min(IF(ao."level" =7, p.disstsflevel, NULL)) AS varchar)) AS o7
+                			, (CAST (min(IF(ao."level" =8, p.disstsflevel, NULL)) AS varchar)) AS o8
+                			, (CAST (min(IF(ao."level" =9, p.disstsflevel, NULL)) AS varchar)) AS o9
+                			, (CAST (min(IF(ao."level" =10, p.disstsflevel, NULL)) AS varchar)) AS o10
+                			, (CAST (min(IF(ao."level" =11, p.disstsflevel, NULL)) AS varchar)) AS o11
+                			, (CAST (min(IF(ao."level" =12, p.disstsflevel, NULL)) AS varchar)) AS o12
+                			, (CAST (min(IF(ao."level" =13, p.disstsflevel, NULL)) AS varchar)) AS o13
+                			, (CAST (min(IF(ao."level" =14, p.disstsflevel, NULL)) AS varchar)) AS o14
+                			, (CAST (min(IF(ao."level" =15, p.disstsflevel, NULL)) AS varchar)) AS o15
+                			, (CAST (min(IF(ao."level" =16, p.disstsflevel, NULL)) AS varchar)) AS o16
+                	   FROM (SELECT * FROM apply_orgnz WHERE  psnnlbatchid = #{srchDegree}) ao
+                       <if test="(srchRank != null and srchRank != '') or (srchSpecial != null and srchSpecial != '')">
+                          INNER JOIN [user] u
+                             ON ao.userid = u.userid
+                           <if test="srchRank != null and srchRank != '' ">
+                            AND u.rankcodeid = #{srchRank}
+                           </if>
+                           <if test="srchSpecial != null and srchSpecial != '' ">
+                            AND u.specialDutyCodeId = #{srchSpecial}
+                           </if>
+                       </if>
+                	  INNER JOIN (SELECT * FROM psnnl WHERE  psnnlbatchid = #{srchDegree}) p
+                         on ao.userid = p.userid
+                	  GROUP BY ao.orgnzid
+					 ) ao
+			ON o.orgnzid = ao.orgnzid
+		 WHERE o.applorgnzyn = 'Y'
+        <if test="srchOrgnz != null and srchOrgnz != ''">AND o.orgnzid = #{srchOrgnz}</if>
+
+        ORDER BY o.name
+	</select>
+
+	<select id="selectInOut" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT o.orgnzid, o.name
+             , (NVL(dept1nrm, 0) + NVL(dept2nrm, 0) + NVL(dept3nrm, 0) + NVL(dept4nrm, 0)+ NVL(dept5nrm, 0) + NVL(dept6nrm, 0) + NVL(dept7nrm, 0)) AS nrmTotal
+             , u.cnt AS nowTotal
+             , (nvl(o1.rnk001,0)+nvl(o1.rnk002,0)+nvl(o1.rnk003,0)+nvl(o1.rnk004,0)+nvl(o1.rnk005,0)+nvl(o1.rnk006,0)+nvl(o1.rnk007,0)) AS sumrnk
+             , (nvl(o1.outrnk001,0)+nvl(o1.outrnk002,0)+nvl(o1.outrnk003,0)+nvl(o1.outrnk004,0)+nvl(o1.outrnk005,0)+nvl(o1.outrnk006,0)+nvl(o1.outrnk007,0)) AS sumoutrnk
+             , nvl(o1.rnk001,0) AS rnk001
+             , nvl(o1.rnk002,0) AS rnk002
+             , nvl(o1.rnk003,0) AS rnk003
+             , nvl(o1.rnk004,0) AS rnk004
+             , nvl(o1.rnk005,0) AS rnk005
+             , nvl(o1.rnk006,0) AS rnk006
+             , nvl(o1.rnk007,0) AS rnk007
+             , nvl(o1.outrnk001,0) AS outrnk001
+             , nvl(o1.outrnk002,0) AS outrnk002
+             , nvl(o1.outrnk003,0) AS outrnk003
+             , nvl(o1.outrnk004,0) AS outrnk004
+             , nvl(o1.outrnk005,0) AS outrnk005
+             , nvl(o1.outrnk006,0) AS outrnk006
+             , nvl(o1.outrnk007,0) AS outrnk007
+          FROM (select * from orgnz <if test="srchOrgnz != null and srchOrgnz != ''">WHERE orgnzid = #{srchOrgnz}</if>) o
+          LEFT OUTER JOIN (SELECT orgnzid
+                                , MAX(rnk001) AS rnk001, MAX(rnk002) AS rnk002, MAX(rnk003) AS rnk003, MAX(rnk004) AS rnk004, MAX(rnk005) AS rnk005, MAX(rnk006) AS rnk006, MAX(rnk007) AS rnk007
+                                , MAX(outrnk001) AS outrnk001, MAX(outrnk002) AS outrnk002, MAX(outrnk003) AS outrnk003, MAX(outrnk004) AS outrnk004, MAX(outrnk005) AS outrnk005, MAX(outrnk006) AS outrnk006, MAX(outrnk007) AS outrnk007
+                            FROM (SELECT orgnzid1 AS orgnzid
+                                       , SUM(rnk001) AS rnk001, SUM(rnk002) AS rnk002,  SUM(rnk003) AS rnk003, SUM(rnk004) AS rnk004, SUM(rnk005) AS rnk005, SUM(rnk006) AS rnk006, SUM(rnk007) AS rnk007
+                                       , NULL AS outrnk001, NULL AS outrnk002, NULL AS outrnk003, null AS outrnk004, null AS outrnk005, null AS outrnk006, null AS outrnk007
+                                    FROM (SELECT userid
+                                              , MAX(IF(RANK =1, orgnzid, null)) orgnzid1
+                                              , MAX(IF(RANK =2, orgnzid, null)) orgnzid2
+                                              , SUM(IF(RANK =1 AND rankcodeid = 'RNK001', 1, 0)) AS rnk001
+                                              , SUM(IF(RANK =1 AND rankcodeid = 'RNK002', 1, 0)) AS rnk002
+                                              , SUM(IF(RANK =1 AND rankcodeid = 'RNK003', 1, 0)) AS rnk003
+                                              , SUM(IF(RANK =1 AND rankcodeid = 'RNK004', 1, 0)) AS rnk004
+                                              , SUM(IF(RANK =1 AND rankcodeid = 'RNK005', 1, 0)) AS rnk005
+                                              , SUM(IF(RANK =1 AND rankcodeid = 'RNK006', 1, 0)) AS rnk006
+                                              , SUM(IF(RANK =1 AND rankcodeid = 'RNK007', 1, 0)) AS rnk007
+                                           FROM (SELECT p.*, DENSE_RANK() over(PARTITION BY userid ORDER BY startdt desc) AS RANK
+                                                   FROM psnnl p
+                                                  WHERE userid IN (SELECT userid FROM psnnl WHERE psnnlbatchid = #{srchDegree} AND orgnzid IS NOT NULL)
+                                                 )
+                                          WHERE RANK &lt;=2
+                                          GROUP BY userid
+                                          )
+                                   WHERE orgnzid1 &lt;> orgnzid2
+                                   GROUP BY orgnzid1
+                                   UNION
+                                  SELECT orgnzid2 AS orgnzid
+                                       , NULL, NULL, NULL, NULL, NULL, NULL, NULL
+                                       , SUM(rnk001) AS outrnk001, SUM(rnk002) AS outrnk002,  SUM(rnk003) AS outrnk003, SUM(rnk004) AS outrnk004, SUM(rnk005) AS outrnk005, SUM(rnk006) AS outrnk006, SUM(rnk007) AS outrnk007
+                                    FROM (SELECT userid
+                                               , MAX(IF(RANK =1, orgnzid, null)) orgnzid1
+                                               , MAX(IF(RANK =2, orgnzid, null)) orgnzid2
+                                               , SUM(IF(RANK =2 AND rankcodeid = 'RNK001', 1, 0)) AS rnk001
+                                               , SUM(IF(RANK =2 AND rankcodeid = 'RNK002', 1, 0)) AS rnk002
+                                               , SUM(IF(RANK =2 AND rankcodeid = 'RNK003', 1, 0)) AS rnk003
+                                               , SUM(IF(RANK =2 AND rankcodeid = 'RNK004', 1, 0)) AS rnk004
+                                               , SUM(IF(RANK =2 AND rankcodeid = 'RNK005', 1, 0)) AS rnk005
+                                               , SUM(IF(RANK =2 AND rankcodeid = 'RNK006', 1, 0)) AS rnk006
+                                               , SUM(IF(RANK =2 AND rankcodeid = 'RNK007', 1, 0)) AS rnk007
+                                            FROM (SELECT p.*, DENSE_RANK() over(PARTITION BY userid ORDER BY startdt desc) AS RANK
+                                                    FROM psnnl p
+                                                   WHERE userid IN (SELECT userid FROM psnnl WHERE psnnlbatchid = #{srchDegree} AND orgnzid IS NOT NULL)
+                                                  )
+                                           WHERE RANK &lt;=2
+                                           GROUP BY userid
+                                          )
+                                   WHERE orgnzid1 &lt;> orgnzid2
+                                   GROUP BY orgnzid2
+                                 )
+                           GROUP BY orgnzid
+                          ) o1
+            ON o.orgnzid = o1.orgnzid
+          LEFT OUTER JOIN (SELECT orgnzid, count(1) AS cnt FROM [user] <if test="srchRank != null and srchRank != ''">WHERE rankcodeid = #{srchRank}</if> GROUP BY orgnzid) u
+            ON o.orgnzid = u.orgnzid
+
+         ORDER BY o.name
+	</select>
+	<select id="selectAvg" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT c.codename, pb.degree, p.disstsflevel
+          FROM (SELECT p.rankcodeid, p.psnnlbatchid, TO_CHAR(AVG(p.disstsflevel),'9.9999') disstsflevel
+                  FROM (select * from psnnl WHERE psnnlbatchid = #{srchDegree} AND disstsflevel > 0) p
+                  <if test="(srchOrgnz != null and srchOrgnz != '') or (srchRank != null and srchRank != '') or (srchSpecial != null and srchSpecial != '')">
+                     INNER JOIN [user] u
+                        ON p.userid = u.userid
+                    <if test="srchOrgnz != null and srchOrgnz != '' ">
+                        AND u.orgnzid = #{srchOrgnz}
+                    </if>
+                    <if test="srchRank != null and srchRank != '' ">
+                        AND u.rankcodeid = #{(srchRank}
+                    </if>
+                    <if test="srchSpecial != null and srchSpecial != '' ">
+                        AND u.specialDutyCodeId = #{(srchSpecial}
+                    </if>
+                  </if>
+                 GROUP BY p.rankcodeid
+               )p
+         INNER JOIN psnnl_batch pb
+            ON p.psnnlbatchid = pb.psnnlbatchid
+         INNER JOIN (SELECT * FROM code WHERE catecodeid = 'RNK' AND useyn='Y') c
+            ON c.codeid = p.rankcodeid
+	</select>
+</mapper>

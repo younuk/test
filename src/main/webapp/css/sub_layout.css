@@ -1,0 +1,12 @@
+#container .wrap {width:1199px; border-left:1px solid #ddd;}
+#container .side {float:left; width:258px; padding-bottom:50px; border-right:1px solid #ddd;}
+#container .side .side_menu .depth1_menu .depth1_list .depth1_anchor {display:block; padding-top:15px; padding-bottom:15px; padding-left:20px; border-bottom:1px solid #ddd; color:#333; font-size:18px; transition-property:border-bottom-color, background-color, color; transition-duration:0.25s; transition-timing-function:ease-in-out;}
+#container .side .side_menu .depth1_menu .depth1_list.actived .depth1_anchor, #container .side .side_menu .depth1_menu .depth1_list .depth1_anchor:hover {border-bottom-color:transparent; background-color:#d2d2d2; color:#fff;}
+#container .colgroup {float:left; width:860px; margin-left:-1px; padding-left:80px; border-left:1px solid #ddd;}
+#container .colgroup .sub_head {padding-top:50px; border-bottom:1px solid #bbb; padding-bottom:20px;}
+#container .colgroup .sub_head .sub_title {margin-bottom:30px;}
+#container .colgroup .sub_head .sub_title h2 {color:#333; font-size:30px; line-height:32px;}
+#container .colgroup .sub_head .path ul li {float:left; margin-left:15px; padding-left:25px; background:url('../images/sub/path_bu.gif') no-repeat left center; color:#333; font-size:15px; line-height:16px;}
+#container .colgroup .sub_head .path ul li:first-child {margin-left:0; padding-left:15px; background-image:url('../images/sub/home.gif');}
+#container .colgroup .sub_head .path ul li.actived {font-weight:600;}
+#container .colgroup #contents {position:relative; margin-top:25px; padding-bottom:50px; min-height:700px; font-family:'맑은 고딕', 'Malgun Gothic';}

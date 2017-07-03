@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.ac.ut.eHr.mapper.UserMapper">
+
+	 <sql id="chooseStay5YearStartEnddt">
+				CASE WHEN U.stay5YearStartDt IS NULL THEN ''
+				    ELSE CONCAT(TO_CHAR(U.stay5YearStartDt, 'yyyy-mm-dd'), ' ~ ', TO_CHAR(ADDDATE(stay5yearstartdt, INTERVAL +5 year), 'yyyy-mm-dd'))
+				    END AS stay5YearStartDt
+	</sql>
+	<sql id="sqlSearch">
+
+		<where>
+		 	<if test="orgnzId != null and orgnzId != ''">U.orgnzId = #{orgnzId}</if>
+		 	<if test="name != null and name != ''">AND U.name LIKE '%'||#{name}||'%'</if>
+		 	<if test="loginId != null and loginId != ''">AND L.loginId LIKE '%'||#{loginId}||'%'</if>
+		 	<if test='targetYn == "Y"'> AND p.psnnlbatchid IS NOT NULL</if>
+		 	<if test='targetYn == "N"'> AND p.psnnlbatchid IS NULL</if>
+		 	<if test="rankCodeId != null and rankCodeId != ''">AND U.rankCodeId = #{rankCodeId}</if>
+		 	<if test="specialDutyCodeId != null and specialDutyCodeId != ''">AND U.specialDutyCodeId = #{specialDutyCodeId}</if>
+		 </where>
+	</sql>
+	<!--
+	================================= User =================================
+	 -->
+	<select id="selectList" parameterType="UserSearch" resultType="User">
+		SELECT U.userId
+			 , L.loginId
+			 , U.name
+			 , O.name as orgnzName
+			 , C1.codeName as rankCodeName
+			 , U.birthDt
+			 , U.initialAppmnt
+			 , U.rankAppmnt
+			 , U.orgnzAppmnt
+			 , C2.codeName as specialDutyCodeName
+			 , IF(NOW() BETWEEN NVL(stay5yearstartdt, ADDDATE(NOW(), 1)) AND ADDDATE(stay5yearstartdt, INTERVAL +5 year), 'Y','N') as stay5YearStartDt
+			 , p.psnnlbatchid <!--대상자여부 -->
+			 , CASE WHEN p.psnnlbatchid is not null
+             		THEN (SELECT CASE WHEN COUNT(1) = (SELECT COUNT(*) AS oCnt FROM orgnz WHERE applorgnzyn='Y') THEN '입력완료' ELSE '입력대기' END tt
+					 	    FROM apply_orgnz  ao
+						   WHERE ao.userid = U.userid
+							 AND ao.psnnlbatchid = p.psnnlbatchid)
+					ELSE '' END AS tiePriorityYn
+		  FROM [user] U
+          INNER JOIN login L
+            ON U.userId = L.userId
+         INNER JOIN orgnz O
+            ON U.orgnzId = O.orgnzId
+          LEFT JOIN code C1
+            ON U.rankCodeId = C1.codeId
+           AND C1.catecodeid = 'RNK'
+           AND C1.useyn = 'Y'
+          LEFT JOIN code C2
+            ON U.specialDutyCodeId = C2.codeId
+           AND C2.catecodeid = 'SPD'
+           AND C2.useyn = 'Y'
+          LEFT JOIN (SELECT p.*
+                       FROM psnnl p
+                      INNER JOIN psnnl_batch pb
+                         ON p.psnnlbatchid = pb.psnnlbatchid
+                        AND pb.statcodeid != 'PST006') P
+            ON U.userId = P.userId
+		  <include refid="sqlSearch"/>
+
+		  ORDER BY U.userId desc
+		  LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectListCnt" parameterType="UserSearch" resultType="Integer">
+		SELECT COUNT(1)
+		  FROM [user] U
+         INNER JOIN login L
+            ON U.userId = L.userId
+         INNER JOIN orgnz O
+            ON U.orgnzId = O.orgnzId
+          LEFT JOIN (SELECT p.*
+                       FROM psnnl p
+                      INNER JOIN psnnl_batch pb
+                         ON p.psnnlbatchid = pb.psnnlbatchid
+                        AND pb.statcodeid != 'PST006') P
+            ON U.userId = P.userId
+		  <include refid="sqlSearch"/>
+	</select>
+
+
+	<select id="select" parameterType="User" resultType="User">
+		SELECT U.userId
+			 , U.name
+			 , U.orgnzId
+			 , U.rankCodeId
+			 , U.birthDt
+			 , U.initialAppmnt
+			 , U.rankAppmnt
+			 , U.orgnzAppmnt
+			 , U.ppmntBatch
+			 , U.specialDutyCodeId
+			 , CASE WHEN U.stay5YearStartDt IS NULL THEN ''
+				    ELSE CONCAT(U.stay5YearStartDt, ' ~ ', ADDDATE(stay5yearstartdt, INTERVAL +5 year))
+				    END AS stay5YearStartDt
+			 , L.loginId
+			 , L.authCodeId
+			 <if test="psnnlBatchId !=null and psnnlBatchId!=''">
+			 	, PM.prmtcodeid
+		 		, PM.targetcodeid
+	 		 	, P.tiePriorityYn
+			 </if>
+		  FROM [user] U
+		 INNER JOIN login L
+		    ON U.userId = L.userId
+		 <if test="psnnlBatchId !=null and psnnlBatchId!=''">
+		  LEFT OUTER JOIN (SELECT *
+		                     FROM psnnl_manual PM
+		                    WHERE PM.psnnlBatchId =  #{psnnlBatchId}) PM
+		    ON U.userId = PM.userId
+		  LEFT OUTER JOIN psnnl P
+		  	ON P.userid = U.userid
+		   AND P.psnnlBatchId =  #{psnnlBatchId}
+		 </if>
+		 WHERE U.userId = #{userId}
+	</select>
+
+	<!--
+	================================= (MY INFO) =================================
+	 -->
+
+	<select id="selectMyInfo" parameterType="String" resultType="User">
+		SELECT U.userId
+			 , U.name
+			 , O.name as orgnzName
+			 , U.rankCodeId
+			 , C1.codeName as rankCodeName
+			 , U.birthDt
+			 , U.initialAppmnt
+			 , U.rankAppmnt
+			 , U.orgnzAppmnt
+			 , U.ppmntBatch
+			 , C2.codeName as specialDutyCodeName
+			 , <include refid="chooseStay5YearStartEnddt"/>
+			 , CASE WHEN U.stay5YearStartDt IS NULL THEN ''
+			 	    ELSE IF(TO_CHAR(ADDDATE(U.stay5yearstartdt, INTERVAL +5 year), 'mmdd') > '0701'
+			 	    		, TO_CHAR(ADDDATE(U.stay5yearstartdt, INTERVAL +6 year), 'YYYY')||'-01-01'
+			 	    		, TO_CHAR(ADDDATE(U.stay5yearstartdt, INTERVAL +5 year), 'YYYY')||'-07-01')
+				    END AS nextPsnnlDt
+		     , U.stay5yeardone
+			 , L.loginId
+			 , L.authCodeId
+		  FROM [user] U
+		 INNER JOIN login L
+		    ON U.userId = L.userId
+		 INNER JOIN orgnz O
+		    ON U.orgnzId = O.orgnzId
+		  LEFT JOIN code C1
+		    ON U.rankCodeId = C1.codeId
+		   AND C1.catecodeid = 'RNK'
+		   AND C1.useyn = 'Y'
+		  LEFT JOIN code C2
+		    ON U.specialDutyCodeId = C2.codeId
+		   AND C2.catecodeid = 'SPD'
+		   AND C2.useyn = 'Y'
+		 WHERE U.userId = #{userId}
+	</select>
+
+	<select id="selectRunPsnnl" resultType="String">
+		SELECT psnnlBatchId
+		  FROM psnnl_batch
+		 WHERE runyn = 'Y'
+	</select>
+
+	<insert id="insert" parameterType="User">
+		INSERT INTO [user]
+		( name
+		, orgnzId
+		, rankCodeId
+		, birthDt
+		, initialAppmnt
+		, rankAppmnt
+		, orgnzAppmnt
+		, ppmntBatch
+		, specialDutyCodeId
+		, stay5YearStartDt
+		, regdate
+		, moddate
+		) VALUE
+		( #{name}
+		, #{orgnzId}
+		, #{rankCodeId}
+		, #{birthDt}
+		, #{initialAppmnt}
+		, #{rankAppmnt}
+		, #{orgnzAppmnt}
+		, #{ppmntBatch}
+		, #{specialDutyCodeId}
+		, #{stay5YearStartDt}
+		, now()
+		, now()
+		)
+
+		<selectKey resultType="String" keyProperty="userId" order="AFTER">
+		    select user_ai_userid.current_value from db_root
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="User">
+		UPDATE [user]
+		   SET moddate = now()
+		   	 , name				= #{name}
+			 , orgnzId          = #{orgnzId}
+			 , rankCodeId       = #{rankCodeId}
+			 , birthDt          = #{birthDt}
+			 , initialAppmnt    = #{initialAppmnt}
+			 , rankAppmnt       = #{rankAppmnt}
+			 , orgnzAppmnt      = #{orgnzAppmnt}
+			 , ppmntBatch       = #{ppmntBatch}
+			 , specialDutyCodeId = #{specialDutyCodeId}
+			 , stay5YearStartDt = #{stay5YearStartDt}
+		 WHERE userId = #{userId}
+	</update>
+
+	<delete id="delete" parameterType="String">
+		DELETE
+		  FROM [USER]
+		 WHERE userId = #{value}
+	</delete>
+	<delete id="deleteSchedule" parameterType="String">
+		DELETE
+		  FROM schedule
+		 WHERE userId = #{value}
+	</delete>
+	<delete id="deleteApplyOrgnz" parameterType="String">
+		DELETE
+		  FROM apply_orgnz
+		 WHERE userId = #{value}
+	</delete>
+	<delete id="deleteLogin" parameterType="String">
+		DELETE
+		  FROM login
+		 WHERE userId = #{value}
+	</delete>
+	<delete id="deletePsnnl" parameterType="String">
+		DELETE
+		  FROM psnnl
+		 WHERE userId = #{value}
+	</delete>
+
+
+	<!--
+	================================= LOGIN =================================
+	 -->
+	<select id="selectLoginCnt" parameterType="User" resultType="Integer">
+		SELECT COUNT(1)
+		  FROM login
+		 WHERE loginid = #{loginId}
+
+		 <if test='userId != null and userId != ""'>AND userid != #{userId}</if>
+	</select>
+
+	<insert id="insertLogin" parameterType="User">
+		INSERT INTO login
+		( loginid
+		, [password]
+		, userid
+		, authcodeid
+		)VALUES
+		( #{loginId}
+		, CONCAT(#{loginId}, '123!@#')
+		, #{userId}
+		, #{authCodeId}
+		)
+	</insert>
+
+	<select id="selectLogin" parameterType="String" resultType="Login">
+		SELECT *
+		  FROM login
+		 WHERE userid = #{value}
+	</select>
+
+	<update id="updateLogin" parameterType="User">
+		UPDATE login
+		   SET loginid = #{loginId}
+		   <if test="authCodeId != null and authCodeId != ''">, authcodeid = #{authCodeId}</if>
+		 WHERE userid = #{userId}
+	</update>
+
+	<update id="updateLoginPwd" parameterType="Login">
+		UPDATE login
+		   SET pwchgyn = #{pwChgYn}
+		   <choose>
+		   	<when test='password != ""'>, [password] = #{password}</when>
+		   	<otherwise>, [password] = CONCAT(loginId, '123!@#')</otherwise>
+		   </choose>
+		 WHERE userId = #{userId}
+	</update>
+	<!--
+	================================= ABSENCE =================================
+	 -->
+	<select id="selectAbsenceList" parameterType="User" resultType="Absence">
+		SELECT rankcodeid
+			 , startdt
+			 , enddt
+		  FROM absence
+		 where userID = #{userId}
+		   and rankCodeId = #{rankCodeId}
+	</select>
+
+	<insert id="insertAbsence" parameterType="User">
+		INSERT INTO absence
+		( userId
+		, rankCodeId
+		, startDt
+		, endDt
+		) VALUE
+		<foreach item="item" collection="absences" separator=",">
+           (
+            #{userId}
+            , #{rankCodeId}
+            , #{item.startDt}
+            , #{item.endDt}
+            )
+         </foreach>
+	</insert>
+
+	<delete id="deleteAbsence" parameterType="User">
+		DELETE
+		  FROM absence
+		 WHERE userID = #{userId}
+		   and rankCodeId = #{rankCodeId}
+	</delete>
+
+	<!--
+	================================= DUTY_PERIOD =================================
+	 -->
+	<select id="selectDutyPeriodList" parameterType="User" resultType="DutyPeriod">
+		SELECT startDt
+			 , endDt
+		  FROM duty_period
+		 where userID = #{userId}
+	</select>
+
+	<insert id="insertDutyPeriod" parameterType="User">
+		INSERT INTO duty_period
+		( userId
+		, startDt
+		, endDt
+		) VALUE
+        <foreach item="item" collection="dutyPeriods" separator=",">
+           ( #{userId}
+	        , #{item.startDt}
+	        , #{item.endDt}
+	        )
+         </foreach>
+	</insert>
+
+    <delete id="deleteDutyPeriod" parameterType="User">
+        DELETE
+          FROM duty_period
+         WHERE userID = #{userId}
+    </delete>
+
+	<!--
+	================================= PSNNL_MANUAL =================================
+	 -->
+	<update id="mergePsnnlManual" parameterType="User">
+		MERGE INTO psnnl_manual pm USING db_root
+		   ON pm.userid 		= #{userId}
+		  AND pm.psnnlbatchId   = #{psnnlBatchId}
+		 WHEN matched THEN
+		 	  UPDATE
+		 	  	 SET moddate		 = NOW()
+		 	  	   , pm.prmtcodeid 	 = #{prmtCodeId}
+		 	  	   , pm.targetcodeid = #{targetCodeId}
+		 	  	   , targetyn 		 = DECODE(#{targetCodeId}, 'TGD002', 'N', 'TGD003', 'N', 'Y')
+		 WHEN NOT MATCHED THEN
+		 	  INSERT (userid, psnnlbatchid, prmtcodeid, targetcodeid, targetyn, regdate, moddate)
+		 	  VALUES (#{userId}, #{psnnlBatchId}, #{prmtCodeId}, #{targetCodeId}, DECODE(#{targetCodeId},  'TGD002', 'N', 'TGD003', 'N', 'Y'), NOW(), NOW());
+	</update>
+
+
+    <delete id="deletePsnnlManual" parameterType="User">
+        DELETE
+          FROM psnnl_manual pm
+         WHERE pm.userid 		= #{userId}
+         <if test="psnnlBatchId != null and psnnlBatchId !=''">
+		   AND pm.psnnlbatchId  = #{psnnlBatchId}
+		 </if>
+    </delete>
+
+	<!--
+	================================= APPOINTMENT =================================
+	 -->
+	<insert id="insertAppointment" parameterType="User">
+		INSERT INTO appointment
+		( userid
+		, startdt
+		<!-- , enddt -->
+		, orgnzid
+		, rankcodeid
+		, psnnlbatchid
+		) VALUES
+		( #{userId}
+		, #{ppmntBatch}
+		, #{orgnzId}
+		, #{rankCodeId}
+		, #{psnnlBatchId}
+		)
+	</insert>
+
+	<select id="selectUpRankCodeId" parameterType="String" resultType="String">
+		SELECT NVL(MIN(codeid), #{value}) as codeid
+		  FROM code
+		 WHERE catecodeid = 'RNK'
+		   AND useyn 	  = 'Y'
+		   AND codeid	  > #{value}
+	</select>
+
+
+	<update id="updateStay5" parameterType="java.util.Map">
+		UPDATE [user]
+		  <choose>
+		  	 <when test="div == 'CLEAR'">SET stay5yearstartdt = null, stay5yeardone = 'Y'</when>
+		     <otherwise>SET stay5yearstartdt = now()</otherwise>
+		  </choose>
+		 WHERE userid = #{userId}
+	</update>
+
+
+    <!--
+    ================================= PRINT =================================
+     -->
+
+     <select id="selectPopJang" parameterType="User" resultType="java.util.Map">
+        SELECT u.name AS username, o.name+'소방서' AS orgnzname, '지방'+c.codename AS rankname
+             , DATE_FORMAT(p.startdt, '%Y') AS dtyear
+             , DATE_FORMAT(p.startdt, '%c') AS dtmonth
+             , DATE_FORMAT(p.startdt, '%e') AS dtday
+             , ex_p.exorgnzname+'소방서' AS exorgnzname
+             , '지방'+ex_p.exrankname AS exrankname
+             , IF(p.rankcodeid > ex_p.exrankcodeid, '(승진)', '') AS prmtname
+             , IF(ex_p.userid IS null, '(신규임용)', '') AS newname
+             , IF(o.name &lt;> ex_p.exorgnzname, '(전보)', '') AS transname
+          FROM (SELECT * FROM [user] WHERE userid = #{userId}) u
+         INNER JOIN (SELECT * FROM psnnl WHERE psnnlbatchid = #{psnnlBatchId}) p
+            ON u.userid = p.userid
+         INNER JOIN orgnz o
+            ON p.orgnzid = o.orgnzid
+         INNER JOIN (SELECT * FROM code WHERE catecodeid = 'RNK' AND useyn = 'Y') c
+            ON p.rankcodeid = c.codeid
+          LEFT OUTER JOIN (SELECT p.userid, o.name AS exorgnzname, p.rankcodeid AS exrankcodeid, c.codename AS exrankname
+                             FROM (SELECT *
+                                     FROM psnnl
+                                    WHERE psnnlid = (SELECT MAX(psnnlid) FROM psnnl WHERE userid = #{userId} AND psnnlbatchid &lt;> #{psnnlBatchId})) p
+                            INNER JOIN orgnz o
+                               ON p.orgnzid = o.orgnzid) ex_p
+            ON u.userid = ex_p.userid
+     </select>
+     <select id="selectMaxPsnnlBatchId" parameterType="ArrayList" resultType="User">
+        SELECT userid, MAX(psnnlbatchid) as psnnlbatchid
+          FROM psnnl
+         WHERE orgnzid is not null
+           AND userid in
+         (<foreach item="item" collection="list" separator=",">
+            #{item}
+         </foreach>)
+          group by userid
+     </select>
+
+
+    <!--
+    ================================= EXCEL  =================================
+     -->
+
+     <select id="selectDataValidate" parameterType="User" resultType="String">
+        SELECT CASE WHEN l.loginid IS NULL
+                            AND rnk.codename IS NOT NULL
+                            AND rol.codename IS NOT NULL
+                            AND o.orgnzid IS NOT NULL
+                            AND spc.codename IS NOT NULL THEN o.orgnzid
+          ELSE null END rtn1
+        FROM (SELECT #{loginId} AS loginid, #{rankCodeId} AS rnk, #{authCodeId} AS rol, #{orgnzId} AS org, #{specialDutyCodeId} as spc
+                    FROM db_root ) dr
+        LEFT OUTER JOIN login l
+         ON dr.loginid = l.loginid
+        LEFT OUTER JOIN (SELECT codeid, codename from code WHERE catecodeid = 'RNK' AND useyn ='Y') rnk
+         ON dr.rnk = rnk.codeid
+        LEFT OUTER JOIN (SELECT codeid, codename from code WHERE catecodeid = 'ROL' AND useyn ='Y') rol
+         ON dr.rol = rol.codeid
+        LEFT OUTER JOIN (SELECT codeid, codename from code WHERE catecodeid = 'SPD' AND useyn ='Y') spc
+         ON dr.spc = spc.codeid
+        LEFT OUTER JOIN orgnz o
+         ON dr.org = o.name
+     </select>
+</mapper>

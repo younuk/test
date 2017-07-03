@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%d{HH:mm:ss} %-5level %logger{36} - %msg%n</Pattern>
+		</layout>
+	</appender>
+
+<!-- 	<logger name="com.base22" level="TRACE" /> -->
+
+    <logger name="jdbc.resultset" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="jdbc.audit" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="jdbc.sqltiming" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="jdbc.connection" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+   <!--  <logger name="jdbc.resultsettable" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="STDOUT"/>
+    </logger> -->
+
+
+    <logger name="org.mybatis.spring.SqlSessionUtils" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+	<root level="debug">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>

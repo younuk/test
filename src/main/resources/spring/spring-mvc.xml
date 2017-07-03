@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+    <bean id="download" class="kr.ac.ut.eHr.common.DownloadView"></bean>
+
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
+	<context:component-scan base-package="*" />
+
+	<tx:annotation-driven proxy-target-class="true"/>
+
+	<mvc:view-controller path="/main" view-name="redirect:/main/home"/>
+	<mvc:resources location="/css/" 	mapping="/css/**" />
+	<mvc:resources location="/js/" 		mapping="/js/**" />
+	<mvc:resources location="/font/" 	mapping="/font/**" />
+	<mvc:resources location="/images/" 	mapping="/images/**" />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/view/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!-- For Pagination Tag -->
+	<bean id="imageRenderer" class="kr.ac.ut.eHr.common.ImagePaginationRenderer"/>
+
+	<bean id="textRenderer" class="egovframework.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationRenderer"/>
+
+	<bean id="paginationManager" class="egovframework.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+		<property name="rendererType">
+			<map>
+				<entry key="image" value-ref="imageRenderer"/>
+				<entry key="text" value-ref="textRenderer"/>
+			</map>
+		</property>
+	</bean>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"></bean>
+
+</beans>
+<!--
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<annotation-driven />
+	<context:component-scan base-package="kc.ac.ut.eHr" />
+
+	<default-servlet-handler />
+
+
+	<view-controller path="/main" view-name="redirect:/main/home"/>
+
+	<resources location="/js/" mapping="/js/**" />
+
+	<beans:bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/view/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+</beans:beans>
+ -->

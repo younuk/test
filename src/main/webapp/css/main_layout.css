@@ -1,0 +1,25 @@
+#wrapper {height:100%;}
+
+#header {padding-top:225px;}
+#header .logo {padding-bottom:30px; text-align:center;}
+#header .logo a {display:inline-block; color:#00517a; font-size:22px; line-height:23px;;}
+#header .logo a:hover {text-decoration:none;}
+#header .logo a img {display:inline-block; margin-right:10px; vertical-align:middle;}
+
+#container .login {width:500px; padding:100px; margin:0 auto; border:3px solid #013c80; background-color:#fdfdfd;}
+#container .login form {text-align:center;}
+#container .login form fieldset {display:inline; position:relative; padding-right:125px; text-align:left;}
+#container .login form fieldset .user_id {margin-bottom:5px;}
+#container .login form fieldset .user_id, #container .login form fieldset .user_pw, #container .login form fieldset .save_id {font-size:0;}
+#container .login form fieldset label, #container .login form fieldset input[type='text'], #container .login form fieldset input[type='password'] {display:inline-block; vertical-align:middle;}
+#container .login form fieldset .user_id label, #container .login form fieldset .user_pw label {width:50px; height:50px; border-top-left-radius:5px; border-bottom-left-radius:5px; background-repeat:no-repeat; background-position-x:center; background-position-y:center; background-color:#185aa6; font-size:0;}
+#container .login form fieldset .user_id label {background-image:url('../images/main/user_id_bu.gif');}
+#container .login form fieldset .user_pw label {background-image:url('../images/main/user_pw_bu.gif');}
+#container .login form fieldset .user_id input[type='text'], #container .login form fieldset .user_pw input[type='password'] {width:230px; height:44px; padding-left:10px; padding-right:10px; border-top:3px solid #185aa6; border-right:3px solid #185aa6; border-bottom:3px solid #185aa6; border-top-right-radius:5px; border-bottom-right-radius:5px; color:#333; font-size:15px; line-height:16px;}
+#container .login form fieldset input[type='submit'] {position:absolute; top:0; right:0; width:105px; height:105px; border-radius:5px; background-color:#009666; color:#fff; font-size:20px; font-weight:600;}
+#container .login form fieldset .save_id {margin-top:20px;}
+#container .login form fieldset .save_id label {margin-left:5px; color:#333; font-size:15px; font-weight:600; line-height:17px;}
+
+#footer {position:absolute; bottom:0; left:0; width:100%; background-color:#ebebeb;}
+#footer .wrap {padding-top:30px; padding-bottom:30px;}
+#footer .footer_info p {text-align:center;}

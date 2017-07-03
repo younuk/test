@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.ac.ut.eHr.mapper.OrgnzMapper">
+
+	<sql id="sqlSearch">
+		 <where>
+		 	<if test="srchOrgnzId != null and srchOrgnzId != ''"> orgnzid = #{srchOrgnzId}</if>
+		 	<if test="srchNrmCntStart != null and srchNrmCntStart != ''">   AND nrmTotal >= #{srchNrmCntStart}</if>
+            <if test="srchNrmCntEnd != null and srchNrmCntEnd != ''">       AND nrmTotal &lt;= #{srchNrmCntEnd}</if>
+		 	<if test="srchVccCntStart != null and srchVccCntStart != ''">   AND vccTotal >= #{srchVccCntStart}</if>
+            <if test="srchVccCntEnd != null and srchVccCntEnd != ''">       AND vccTotal &lt;= #{srchVccCntEnd}</if>
+		 	<if test="srchNowCntStart != null and srchNowCntStart != ''">   AND (nrmTotal-vccTotal) >= #{srchNowCntStart}</if>
+            <if test="srchNowCntEnd != null and srchNowCntEnd != ''">       AND (nrmTotal-vccTotal) &lt;= #{srchNowCntEnd}</if>
+		 </where>
+	</sql>
+
+	<select id="selectList" parameterType="OrgnzSearch" resultType="Orgnz">
+		SELECT orgnzid, [name], nrmTotal, vccTotal, nowTotal, psbTotal
+		  FROM (SELECT o.orgnzid
+				 	 , name
+					 , NVL(dept1nrm, 0) + NVL(dept2nrm, 0) + NVL(dept3nrm, 0) + NVL(dept4nrm, 0)+ NVL(dept5nrm, 0) + NVL(dept6nrm, 0) + NVL(dept7nrm, 0) AS nrmTotal
+					 , NVL(dept1vcc, 0) + NVL(dept2vcc, 0) + NVL(dept3vcc, 0) + NVL(dept4vcc, 0)+ NVL(dept5vcc, 0) + NVL(dept6vcc, 0) + NVL(dept7vcc, 0) AS vccTotal
+					 , (NVL(dept1nrm, 0) + NVL(dept2nrm, 0) + NVL(dept3nrm, 0) + NVL(dept4nrm, 0)+ NVL(dept5nrm, 0))
+					 	- (NVL(dept1vcc, 0) + NVL(dept2vcc, 0) + NVL(dept3vcc, 0) + NVL(dept4vcc, 0)+ NVL(dept5vcc, 0)) AS psbTotal
+					 , NVL(u.cnt, 0) AS nowTotal
+					 , o.applorgnzyn
+				  FROM orgnz o
+				  LEFT OUTER JOIN (SELECT orgnzid, count(1) AS cnt FROM [user] GROUP BY orgnzid) u
+				    ON o.orgnzid = u.orgnzid
+				)
+		<include refid="sqlSearch"/>
+
+
+		 ORDER BY o.name
+		 LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+
+
+	<select id="selectListCnt" parameterType="OrgnzSearch" resultType="Integer">
+		SELECT COUNT(1)
+		  FROM (SELECT orgnzid
+				 	 , name
+					 , NVL((dept1nrm + dept2nrm + dept3nrm + dept4nrm + dept5nrm), 0) AS nrmTotal
+					 , NVL((dept1vcc + dept2vcc + dept3vcc + dept4vcc + dept5vcc), 0) AS vccTotal
+					 , applorgnzyn
+				  FROM orgnz
+				)
+		  <include refid="sqlSearch"/>
+	</select>
+
+	<select id="select" parameterType="String" resultType="Orgnz">
+		SELECT o.orgnzId
+			 , o.name
+			 , NVL(dept1nrm, 0) AS dept1nrm
+			 , NVL(dept1vcc, 0) AS dept1vcc
+			 , NVL(dept1Now, 0) AS dept1Now
+			 , NVL(dept2nrm, 0) AS dept2nrm
+			 , NVL(dept2vcc, 0) AS dept2vcc
+			 , NVL(dept2Now, 0) AS dept2Now
+			 , NVL(dept3nrm, 0) AS dept3nrm
+			 , NVL(dept3vcc, 0) AS dept3vcc
+			 , NVL(dept3Now, 0) AS dept3Now
+			 , NVL(dept4nrm, 0) AS dept4nrm
+			 , NVL(dept4vcc, 0) AS dept4vcc
+			 , NVL(dept4Now, 0) AS dept4Now
+			 , NVL(dept5nrm, 0) AS dept5nrm
+			 , NVL(dept5vcc, 0) AS dept5vcc
+			 , NVL(dept5Now, 0) AS dept5Now
+			 , NVL(dept6nrm, 0) AS dept6nrm
+			 , NVL(dept6vcc, 0) AS dept6vcc
+			 , NVL(dept6Now, 0) AS dept6Now
+			 , NVL(dept7nrm, 0) AS dept7nrm
+			 , NVL(dept7vcc, 0) AS dept7vcc
+			 , NVL(dept7Now, 0) AS dept7Now
+			 , NVL(dept1nrm, 0) + NVL(dept2nrm, 0) + NVL(dept3nrm, 0) + NVL(dept4nrm, 0)+ NVL(dept5nrm, 0) + NVL(dept6nrm, 0) + NVL(dept7nrm, 0) AS nrmTotal
+			 , NVL(dept1vcc, 0) + NVL(dept2vcc, 0) + NVL(dept3vcc, 0) + NVL(dept4vcc, 0)+ NVL(dept5vcc, 0) + NVL(dept6vcc, 0) + NVL(dept7vcc, 0) AS vccTotal
+			 , NVL(dept1Now, 0) + NVL(dept2Now, 0) + NVL(dept3Now, 0) + NVL(dept4Now, 0)+ NVL(dept5Now, 0) + NVL(dept6Now, 0) + NVL(dept7vcc, 0) AS nowTotal
+			 , NVL(special, 0) AS special
+			 , NVL(applorgnzyn, 'N') as applorgnzyn
+		  FROM orgnz o
+		  LEFT OUTER JOIN (SELECT orgnzid
+		   						, SUM(IF(rankcodeid = 'RNK001', 1, 0)) AS dept1Now
+						     	, SUM(IF(rankcodeid = 'RNK002', 1, 0)) AS dept2Now
+						     	, SUM(IF(rankcodeid = 'RNK003', 1, 0)) AS dept3Now
+						     	, SUM(IF(rankcodeid = 'RNK004', 1, 0)) AS dept4Now
+						     	, SUM(IF(rankcodeid = 'RNK005', 1, 0)) AS dept5Now
+						     	, SUM(IF(rankcodeid = 'RNK006', 1, 0)) AS dept6Now
+						     	, SUM(IF(rankcodeid = 'RNK007', 1, 0)) AS dept7Now
+							 FROM [user]
+							WHERE orgnzId = #{value}
+							GROUP BY orgnzid) u
+				ON o.orgnzid = u.orgnzid
+		 WHERE o.orgnzId = #{value}
+
+	</select>
+
+	<insert id="insert" parameterType="Orgnz">
+		INSERT INTO orgnz
+		( name
+		, dept1nrm
+		, dept1vcc
+		, dept2nrm
+		, dept2vcc
+		, dept3nrm
+		, dept3vcc
+		, dept4nrm
+		, dept4vcc
+		, dept5nrm
+		, dept5vcc
+		, dept6nrm
+		, dept6vcc
+		, dept7nrm
+		, dept7vcc
+		, special
+		, applorgnzyn
+		, regdate
+		, moddate
+		) VALUES
+		( #{name}
+		, #{dept1Nrm}
+		, #{dept1Vcc}
+		, #{dept2Nrm}
+		, #{dept2Vcc}
+		, #{dept3Nrm}
+		, #{dept3Vcc}
+		, #{dept4Nrm}
+		, #{dept4Vcc}
+		, #{dept5Nrm}
+		, #{dept5Vcc}
+		, #{dept6Nrm}
+		, #{dept6Vcc}
+		, #{dept7Nrm}
+		, #{dept7Vcc}
+		, #{special}
+		, #{applOrgnzYn}
+		, now()
+		, now()
+		)
+	</insert>
+
+	<update id="update" parameterType="Orgnz">
+		UPDATE orgnz
+		   SET moddate	= now()
+		   	 , name     = #{name}
+			 , dept1nrm = #{dept1Nrm}
+			 , dept1vcc = #{dept1Vcc}
+			 , dept2nrm = #{dept2Nrm}
+			 , dept2vcc = #{dept2Vcc}
+			 , dept3nrm = #{dept3Nrm}
+			 , dept3vcc = #{dept3Vcc}
+			 , dept4nrm = #{dept4Nrm}
+			 , dept4vcc = #{dept4Vcc}
+			 , dept5nrm = #{dept5Nrm}
+			 , dept5vcc = #{dept5Vcc}
+			 , dept6nrm = #{dept6Nrm}
+			 , dept6vcc = #{dept6Vcc}
+			 , dept7nrm = #{dept7Nrm}
+			 , dept7vcc = #{dept7Vcc}
+			 , special  = #{special}
+			 , applorgnzyn = #{applOrgnzYn}
+		 WHERE orgnzId  = #{orgnzId}
+	</update>
+
+	<delete id="delete" parameterType="String">
+		DELETE
+		  FROM orgnz
+		 WHERE orgnzId = #{value}
+	</delete>
+	<delete id="deleteSchedule" parameterType="String">
+		DELETE
+		  FROM schedule
+		 WHERE orgnzId = #{value}
+	</delete>
+	<delete id="deleteApplOrgnz" parameterType="String">
+		DELETE
+		  FROM apply_orgnz
+		 WHERE orgnzId = #{value}
+	</delete>
+	<delete id="deleteLogin" parameterType="String">
+		DELETE
+		  FROM login
+		 WHERE userid in (select userid from [user] where orgnzId = #{value})
+	</delete>
+	<delete id="deletePsnnl" parameterType="String">
+		DELETE
+		  FROM psnnl
+		 WHERE userid in (select userid from [user] where orgnzId = #{value})
+	</delete>
+	<delete id="deletePsnnlManual" parameterType="String">
+		DELETE
+		  FROM psnnl_manual
+		 WHERE userid in (select userid from [user] where orgnzId = #{value})
+	</delete>
+	<delete id="deleteUser" parameterType="String">
+		DELETE
+		  FROM [user]
+		 WHERE orgnzId = #{value}
+	</delete>
+
+
+	<select id="selectComboList" parameterType="String" resultType="Orgnz">
+		SELECT orgnzid
+			 , [name]
+		 FROM orgnz
+		<if test='value != null and value != ""'>WHERE applorgnzyn = #{value}</if>
+        ORDER BY [name]
+	</select>
+</mapper>

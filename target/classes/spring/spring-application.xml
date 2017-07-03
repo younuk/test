@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+
+	<context:component-scan base-package="*" />
+
+	<!-- JDBC -->
+	<bean id="dataSourceSpied" class="org.apache.commons.dbcp.BasicDataSource" >
+		<property name="driverClassName" value="cubrid.jdbc.driver.CUBRIDDriver"/>
+		<!-- <property name="url" value="jdbc:cubrid:localhost:30000:eHR:::"/>
+		<property name="username" value="utadmin"/>
+		<property name="password" value="eHR119!Q@W#E"/> -->
+		<property name="url" value="jdbc:cubrid:localhost:33000:eHR3:::"/>
+		<property name="username" value="dba"/>
+		<property name="password" value="ehradmin123!@#"/>
+	</bean>
+
+	<bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+        <constructor-arg ref="dataSourceSpied" />
+        <property name="logFormatter">
+            <bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+                <property name="loggingType" value="MULTI_LINE" />
+                <property name="sqlPrefix" value="SQL         :  "/>
+            </bean>
+        </property>
+    </bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:/mybatis/*.xml"/>
+		<property name="typeAliasesPackage" value="kr.ac.ut.eHr.domain" />
+	</bean>
+
+	<!-- <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean> -->
+
+	<!-- mybatis -->
+	<mybatis:scan base-package="kr.ac.ut.eHr.mapper" />
+
+	<!-- transaction -->
+	<tx:annotation-driven proxy-target-class="true"/>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- scheduler -->
+    <task:scheduled-tasks scheduler="eHrScheduler">
+        <task:scheduled ref="EHrScheduler" method="changeStatus" cron="0 0 1 * * *" />
+    </task:scheduled-tasks>
+    <task:scheduler id="eHrScheduler" pool-size="1" />
+
+
+    <util:properties id="config" location="classpath:config/env.properties"/>
+</beans>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.ac.ut.eHr.mapper.EHrSchedulerMapper">
+
+	<update id="updatePsnnlBatchStartCode">
+		UPDATE psnnl_batch
+		   SET statcodeid 	= 'PST003'
+		 WHERE instartdt 	= DATE(NOW())
+		   AND statcodeid 	= 'PST002'
+	</update>
+
+	<update id="updatePsnnlBatchEndCode">
+		UPDATE psnnl_batch
+		   SET statcodeid 	= 'PST004'
+		 WHERE psnnlbatchid in (SELECT pb.psnnlbatchid
+								  FROM psnnl_batch pb
+								 WHERE statcodeid = 'PST003'
+								   AND inenddt 	= DATE(NOW())
+								   AND pb.psnnlbatchid NOT IN ( SELECT  p.psnnlbatchid
+																  FROM psnnl p
+																  LEFT OUTER JOIN ( SELECT psnnlbatchid, userid, count(1) AS cnt
+																				      FROM apply_orgnz
+																				     GROUP BY psnnlbatchid, userid) ao
+																    ON p.userid = ao.userid
+																   AND p.psnnlbatchid = ao.psnnlbatchid
+																 WHERE NVL(ao.cnt, 0) &lt;&gt; (SELECT COUNT(1) FROM orgnz WHERE applorgnzyn = 'Y'))
+								)
+	</update>
+
+	<select id="selectPsnnlStandby" resultType="java.util.Map">
+		SELECT *
+		  FROM schedule
+		<!--  WHERE rundt = DATE(NOW()) -->
+	</select>
+
+	<update id="updateUserPsnnl" parameterType="java.util.Map">
+		UPDATE [user]
+		   SET moddate = NOW()
+		   <if test='orgnzchangeyn eq "Y"'>, orgnzid = #{orgnzid} , orgnzappmnt = NOW()</if>
+		   <if test='rankchangyn eq "Y"'>, rankcodeid = #{rankcodeid}, rankappmnt = NOW()</if>
+		     , ppmntbatch = NOW()
+		 WHERE userid = #{userid}
+	</update>
+
+	<delete id="deleteSchedule">
+		DELETE
+		  FROM schedule
+		 WHERE rundt = DATE(NOW())
+	</delete>
+</mapper>

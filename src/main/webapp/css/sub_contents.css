@@ -1,0 +1,19 @@
+#contents .search {margin-bottom:50px;}
+#contents .search fieldset {text-align:center;}
+#contents .search fieldset .box {margin-bottom:20px;}
+#contents .search fieldset .box .input_line {margin-top:10px; font-size:0;}
+#contents .search fieldset .box .input_line:first-child {margin-top:0;}
+#contents .search fieldset .box .input_line label, #contents .search fieldset .box .input_line select, #contents .search fieldset .box .input_line input[type='radio'] {display:inline-block; font-size:16px; vertical-align:middle;}
+#contents .search fieldset .box .input_line label {margin-right:5px; font-weight:600;}
+
+#contents .pagination {margin-top:30px; text-align:center; font-size:0;}
+#contents .pagination a {display:inline-block; width:26px; height:26px; margin-left:5px; border:1px solid #ddd; color:#333; font-size:13px; line-height:26px; vertical-align:middle;}
+#contents .pagination strong {display:inline-block; width:28px; height:28px; margin-left:5px; background-color:#353535; color:#fff; font-size:13px; line-height:26px; font-weight:400; vertical-align:middle;}
+#contents .pagination .prev_group, #contents .pagination .next_group {font-size:0;}
+#contents .pagination .next_group {margin-left:5px;}
+#contents .pagination .prev_group a, #contents .pagination .next_group a {font-size:0;}
+#contents .pagination .prev_group .prev {background:url('/images/contents/prev_bu.gif') no-repeat center center;}
+#contents .pagination .prev_group .prev_end {background:url('/images/contents/prev_end_bu.gif') no-repeat center center;}
+#contents .pagination .next_group .next {background:url('/images/contents/next_bu.gif') no-repeat center center;}
+#contents .pagination .next_group .next_end {background:url('/images/contents/next_end_bu.gif') no-repeat center center;}
+#contents .pagination .prev_group a:first-child, #contents .pagination .next_group a:first-child {margin-left:0;}

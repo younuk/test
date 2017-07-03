@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.ac.ut.eHr.mapper.PsnnlMapper">
+
+    <!--
+    ================================= psnnl =================================
+     -->
+
+    <sql id="sqlSearch">
+         INNER JOIN psnnl_batch pb
+            ON p.psnnlbatchid = pb.psnnlbatchid
+          LEFT OUTER JOIN code C1
+            ON pb.divcodeid = C1.codeId
+           AND C1.catecodeid = 'PDV'
+           AND C1.useyn = 'Y'
+          LEFT OUTER JOIN code C2
+            ON pb.statcodeid = C2.codeId
+           AND C2.catecodeid = 'PST'
+           AND C2.useyn = 'Y'
+          LEFT OUTER JOIN orgnz O
+            ON p.orgnzId = O.orgnzId
+
+        WHERE p.userid = #{userId}
+
+         <if test="divCodeId != null and divCodeId != ''"> AND PB.divCodeId = #{divCodeId}</if>
+         <if test="srchStartDt != null and srchStartDt != ''"> AND PB.dt  &gt;= #{srchStartDt}</if>
+         <if test="srchEndDt != null and srchEndDt != ''"> AND PB.dt  &lt;= #{srchEndDt}</if>
+         <if test="srchOrgnzId != null and srchOrgnzId != ''"> AND P.orgnzId = #{srchOrgnzId}</if>
+    </sql>
+    <select id="selectList" parameterType="PsnnlSearch" resultType="Psnnl">
+        SELECT p.psnnlId
+             , p.userId
+             , p.psnnlBatchId
+             , C1.codeName AS divCodeName
+             , C2.codeName AS statCodeName
+             , pb.statcodeid AS statCodeId
+             , p.startDt
+             , O.name AS orgnzName
+             , p.orgnzRank
+             , p.disStsfLevel
+             , pb.statcodeid
+             , CASE WHEN pb.statcodeid &lt;&gt; 'PST006'
+                    THEN (SELECT CASE WHEN COUNT(1) = (SELECT COUNT(*) AS oCnt FROM orgnz WHERE applorgnzyn='Y') THEN '입력완료' ELSE '입력대기' END tt
+                            FROM apply_orgnz  ao
+                           WHERE ao.userid = p.userid
+                             AND ao.psnnlbatchid = p.psnnlbatchid)
+                    ELSE '' END AS tiePriorityYn
+          FROM psnnl p
+         <include refid="sqlSearch"></include>
+
+        ORDER BY P.startDt DESC
+        LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+    </select>
+
+    <select id="selectListCnt" parameterType="PsnnlSearch" resultType="Integer">
+        SELECT COUNT(1)
+          FROM psnnl p
+         <include refid="sqlSearch"></include>
+    </select>
+
+    <select id="select" parameterType="String" resultType="Psnnl">
+        SELECT P.psnnlId
+             , C1.codeName AS divCodeName
+             , C2.codeName AS statCodeName
+             , P.startDt
+             , P.endDt
+             , O.name AS orgnzName
+             , P.orgnzrank
+             , P.disstsflevel
+             , C3.codeName AS prmtCodeName
+             , C4.codeName AS targetCodeName
+             , U.orgnzid
+             , U.name
+             , P.staylevel
+             , DECODE(NVL(P.staylevel, ''), '', 'N', 'Y') AS stayYn
+             , <include refid="kr.ac.ut.eHr.mapper.UserMapper.chooseStay5YearStartEnddt"/>
+             , PB.statCodeId
+             , P.userId
+             , P.psnnlBatchId
+             , P.tiePriorityYn
+          FROM psnnl P
+         INNER JOIN psnnl_batch PB
+            ON P.psnnlbatchid  = PB.psnnlbatchid
+         INNER JOIN [user] U
+            ON P.userid  = u.userid
+          LEFT OUTER JOIN orgnz O
+            ON P.orgnzid = O.orgnzid
+          LEFT OUTER JOIN code C1
+            ON PB.divCodeId = C1.codeId
+           AND C1.catecodeid = 'PDV'
+           AND C1.useyn = 'Y'
+          LEFT OUTER JOIN code C2
+            ON PB.statCodeId = C2.codeId
+           AND C2.catecodeid = 'PST'
+           AND C2.useyn = 'Y'
+          LEFT OUTER JOIN psnnl_manual pm
+            ON pm.userid = p.userid
+           AND pm.psnnlbatchid = p.psnnlbatchid
+          LEFT OUTER JOIN code C3
+            ON pm.prmtCodeId = C3.codeId
+           AND C3.catecodeid = 'PMT'
+           AND C3.useyn = 'Y'
+          LEFT OUTER JOIN code C4
+            ON pm.targetCodeId = C4.codeId
+           AND C4.catecodeid = 'TGD'
+           AND C4.useyn = 'Y'
+         WHERE psnnlId = #{psnnlId}
+    </select>
+
+
+    <update id="updateStayLevel" parameterType="Psnnl">
+        UPDATE psnnl
+           SET moddate = NOW()
+         <choose>
+            <when test="stayLevel != null and stayLevel != ''">, stayLevel =#{stayLevel}</when>
+            <otherwise>, stayLevel = null</otherwise>
+         </choose><!--
+         <choose>
+            <when test="tiePriorityYn != null and tiePriorityYn != ''">, tiePriorityYn =#{tiePriorityYn}</when>
+            <otherwise>, tiePriorityYn = 'N'</otherwise>
+         </choose> -->
+        WHERE psnnlId = #{psnnlId}
+    </update>
+
+    <update id="updateTiePriorityYn" parameterType="Psnnl">
+        UPDATE psnnl
+           SET moddate = NOW()
+         <choose>
+            <when test="tiePriorityYn != null and tiePriorityYn != ''">, tiePriorityYn =#{tiePriorityYn}</when>
+            <otherwise>, tiePriorityYn = 'N'</otherwise>
+         </choose>
+        WHERE userid = #{userId}
+          AND psnnlBatchId = #{psnnlBatchId}
+    </update>
+
+    <!-- ======================================================================= -->
+
+    <select id="selectExixtStaylevelList" parameterType="String" resultType="Psnnl">
+        SELECT userid, staylevel
+          FROM psnnl
+         WHERE psnnlBatchId = #{value}
+           AND NVL(staylevel, '') &lt;&gt; ''
+    </select>
+
+    <delete id="delete" parameterType="String">
+        DELETE
+          FROM psnnl
+         WHERE psnnlBatchId = #{value}
+    </delete>
+
+    <select id="selectTargetList" parameterType="PsnnlBatch" resultType="Psnnl">
+        SELECT #{psnnlBatchId} as psnnlBatchId, #{dt} as startDt, userid, rankcodeid, 'N' as psnnlResultDiv
+          FROM [user]
+         WHERE ppmntbatch &lt;= ADDDATE(TO_DATE(#{dt}), INTERVAL -1 year)
+           <!-- AND (NVL(stay5yearstartdt, '') = '' OR ((stay5yn = 'Y' AND ppmntbatch &lt;= ADDDATE(SYSDATE, INTERVAL -5 year))) ) -->
+           AND NOW() NOT BETWEEN NVL(stay5yearstartdt, ADDDATE(NOW(), 1)) AND ADDDATE(stay5yearstartdt, INTERVAL +5 year)
+           AND userid NOT IN (SELECT userid FROM psnnl_manual WHERE psnnlbatchid = #{psnnlBatchId})
+           AND orgnzid in (SELECT orgnzid FROM orgnz WHERE applorgnzyn= 'Y')
+         UNION ALL
+        SELECT #{psnnlBatchId} as psnnlBatchId, #{dt} as startDt, pm.userid
+             , CASE WHEN prmtcodeid LIKE  'PMT'||'%'
+               THEN (SELECT NVL(MIN(codeid), u.rankcodeid)
+                       FROM code
+                      WHERE catecodeid = 'RNK'
+                        AND codeid &gt; u.rankcodeid)
+                 ELSE u.rankcodeid END rnk
+             , 'M' as psnnlResultDiv
+          FROM psnnl_manual pm
+         INNER JOIN [user] u
+            ON pm.userid = u.userid
+         WHERE pm.psnnlbatchid = #{psnnlBatchId}
+           AND pm.targetyn = 'Y'
+    </select>
+
+    <insert id="insertAll" parameterType="ArrayList">
+        INSERT INTO psnnl
+        ( psnnlBatchId
+        , userId
+        , startdt
+        , rankcodeid
+        , psnnlResultDiv
+        , staylevel
+        , regdate
+        , moddate
+        )
+        VALUES
+        <foreach item="item" collection="list" separator=",">
+           ( #{item.psnnlBatchId}
+            , #{item.userId}
+            , #{item.startDt}
+            , #{item.rankCodeId}
+            , #{item.psnnlResultDiv}
+            , #{item.stayLevel}
+            , NOW()
+            , NOW()
+            )
+         </foreach>
+    </insert>
+
+    <update id="updateTargetManual" parameterType="String">
+        UPDATE psnnl p
+           SET (p.prmtcodeid, p.targetcodeid) = (SELECT pm.prmtcodeid, pm.targetcodeid
+                                                   FROM psnnl_manual pm
+                                                  WHERE p.userid = pm.userid
+                                                    AND p.psnnlbatchid = pm.psnnlbatchid)
+        WHERE psnnlbatchid = #{value}
+          AND psnnlresultdiv = 'M'
+    </update>
+
+    <!-- ======================================================================= -->
+
+    <update id="updateBatchBefore" parameterType="String">
+            UPDATE psnnl p
+               SET moddate = NOW()
+                 , orgnzid = null
+                 , orgnzrank = null
+                 , psnnlresultdiv = decode(psnnlresultdiv, 'M', 'M', 'N', 'N', null)
+                 , disstsflevel = (SELECT MAX(disstsflevel) FROM psnnl p2 where p.userid = p2.userid GROUP BY userid)
+                 <!-- , disstsflevel = (SELECT TO_CHAR(ROUND(SUM(orgnzMon)/(SUM(months)+5), 5))
+                                     FROM (SELECT TO_CHAR(NVL(months, 0) * codename) orgnzMon, months
+                                             FROM apply_orgnz ao
+                                            INNER JOIN code cd
+                                               ON ao."level" = cd.sortno
+                                              AND cd.catecodeid = 'PRM'
+                                              AND cd.useyn = 'Y'
+                                            WHERE ao.userId = p.userId
+                                              AND ao.psnnlBatchId = #{psnnlBatchId}
+                                            )
+                                    ) -->
+             WHERE psnnlbatchid = #{psnnlBatchId}
+    </update>
+
+    <update id="updateBatchBefore2" parameterType="String">
+            UPDATE psnnl p
+              SET disstsflevel = (SELECT TO_CHAR(ROUND(AVG(disstsflevel)*0.8, 5))
+                                    FROM psnnl
+                                   WHERE psnnlbatchid = #{psnnlBatchId}
+                                     AND NVL(disstsflevel, '') != '')
+            WHERE psnnlbatchid = #{psnnlBatchId}
+              AND NVL(disstsflevel, '') = ''
+    </update>
+
+    <select id="selectBatchSpecialDutyCnt" resultType="Integer" parameterType="String">
+        SELECT NVL(SUM(special), 0)
+          FROM orgnz
+    </select>
+
+    <select id="selectBatchSpecialDuty" parameterType="String" resultType="Psnnl">
+        SELECT ao.userid, ao.psnnlbatchid, ao.orgnzid, ao.orgnzRank, ao.disstsflevel, ao.rankcodeid, o.nrmTotal, o.special, o.tCnt,  o.cnt
+          FROM (SELECT u.userid, u.birthdt, u.specialdutycodeid
+                     , ao.orgnzid, ao."level" AS orgnzRank
+                     , p.psnnlbatchid, p.disstsflevel, p.rankcodeid, '' AS rank
+                 FROM apply_orgnz ao
+                INNER JOIN psnnl p
+                   ON ao.userid = p.userid
+                  AND ao.psnnlbatchid = p.psnnlbatchid
+                  AND p.psnnlbatchid = #{psnnlBatchId}
+                  AND p.orgnzid IS NULL
+                INNER JOIN [user] u
+                   ON p.userid = u.userid
+                  AND NVL(u.specialdutycodeid, '') != ''
+                WHERE ao."level" = #{level}
+                 <if test="staylevelyn != null and staylevelyn != ''">
+                   AND ao.staylevelyn = 'Y'
+                  </if>
+               ) ao
+         INNER JOIN (SELECT o.orgnzid, o.codeid AS rankcodeid, (o.special - NVL(cnt, 0)) as nrmTotal, o.special, p2.tCnt as tCnt,  p1.cnt as cnt
+                       FROM (SELECT o.orgnzid, o.[name], c.codeid, o.special
+                                  , NVL(DECODE(c.codeid, 'RNK001', dept1nrm-dept1vcc, 'RNK002', dept2nrm-dept2vcc, 'RNK003', dept3nrm-dept3vcc, 'RNK004', dept4nrm-dept4vcc, 'RNK005', dept5nrm-dept5vcc), 0) AS nrmTotal
+                               FROM orgnz o
+                               LEFT OUTER JOIN code c
+                                 ON c.catecodeid = 'RNK'
+                                AND c.useyn = 'Y'
+                                AND o.special > 0
+                            ) o
+                       LEFT OUTER JOIN (SELECT orgnzid, rankcodeid, COUNT(1) AS cnt FROM psnnl p1 WHERE psnnlbatchid = #{psnnlBatchId} AND orgnzid IS NOT null AND psnnlresultdiv = 'S' GROUP BY orgnzid,rankcodeid   ) p1
+                         ON o.orgnzid = p1.orgnzid
+                        AND o.codeid = p1.rankcodeid
+                       LEFT OUTER JOIN (SELECT orgnzid, COUNT(1) AS tCnt FROM psnnl WHERE psnnlbatchid =#{psnnlBatchId} AND orgnzid IS NOT null AND psnnlresultdiv = 'S' GROUP BY orgnzid) p2
+                         ON o.orgnzid = p2.orgnzid
+                      WHERE nrmTotal > 0
+                        AND o.special > NVL(p2.tCnt, 0)
+                        AND o.nrmTotal > NVL(p1.cnt, 0)
+                    ) o
+             ON ao.orgnzid = o.orgnzid
+            AND ao.rankcodeid = o.rankcodeid
+          ORDER BY ao.specialdutycodeid, o.orgnzid, ao.disstsflevel desc, ao.birthdt
+          LIMIT 1
+    </select>
+
+    <select id="selectBatchOrgnzRank" parameterType="java.util.Map" resultType="Psnnl">
+        SELECT ao.userid, ao.psnnlbatchid, ao.orgnzid, ao.orgnzRank, ao.disstsflevel, ao.rankcodeid
+          FROM (SELECT ao.userid, ao.psnnlbatchid, ao.orgnzid, ao."level" AS orgnzRank   <!-- 희망관서에서 level별로 select -->
+                     , p.disstsflevel, p.rankcodeid
+                     , DENSE_RANK() OVER(PARTITION BY ao.orgnzid, p.rankcodeid ORDER BY p.disstsflevel desc, u.birthdt) AS rank
+                  FROM apply_orgnz ao
+                 INNER JOIN psnnl p
+                    ON ao.userid = p.userid
+                   AND ao.psnnlbatchid = p.psnnlbatchid
+                   AND p.psnnlbatchid = #{psnnlBatchId}
+                   AND p.orgnzid IS NULL
+                 INNER JOIN [user] u
+                    ON p.userid = u.userid
+                 WHERE ao."level" = #{level}
+                 <if test="staylevelyn != null and staylevelyn != ''">
+                   AND ao.staylevelyn = 'Y'
+                  </if>
+               ) ao
+         INNER JOIN (SELECT o.orgnzid, o.codeid AS rankcodeid,  (nrmTotal - NVL(cnt, 0)) as nrmTotal
+                       FROM (SELECT o.orgnzid, o.[name], c.codeid, o.special
+                                  , NVL(DECODE(c.codeid, 'RNK001', dept1nrm-dept1vcc, 'RNK002', dept2nrm-dept2vcc, 'RNK003', dept3nrm-dept3vcc, 'RNK004', dept4nrm-dept4vcc, 'RNK005', dept5nrm-dept5vcc), 0) AS nrmTotal
+                               FROM orgnz o
+                               LEFT OUTER JOIN code c
+                                 ON c.catecodeid = 'RNK'
+                                AND c.useyn = 'Y'
+                            ) o
+                       LEFT OUTER JOIN (SELECT orgnzid, rankcodeid, COUNT(1) AS cnt FROM psnnl WHERE psnnlbatchid = #{psnnlBatchId} and orgnzid IS NOT NULL GROUP BY orgnzid, rankcodeid) p
+                         ON o.orgnzid = p.orgnzid
+                        AND o.codeid = p.rankcodeid
+                      WHERE nrmTotal > NVL(cnt, 0)
+                     ) o
+            ON ao.orgnzid = o.orgnzid
+           AND ao.rankcodeid = o.rankcodeid
+           AND ao.rank &lt;= o.nrmTotal
+    </select>
+
+    <update id="updateBatchPsnnl" parameterType="Psnnl">
+        UPDATE psnnl
+           SET moddate = NOW()
+             , orgnzid = #{orgnzId}
+             , orgnzrank = #{orgnzRank}
+             <if test="psnnlResultDiv != null and psnnlResultDiv != ''">, psnnlResultDiv = #{psnnlResultDiv}</if>
+         WHERE userid = #{userId}
+           AND psnnlbatchid = #{psnnlBatchId}
+    </update>
+
+    <update id="updateBatchPassScore" parameterType="String">
+         UPDATE apply_orgnz ao
+            SET ao.passscore = (SELECT MIN(disstsflevel)
+                                  FROM psnnl p
+                                 WHERE psnnlbatchid = #{value}
+                                   AND p.orgnzid = ao.orgnzid
+                                 GROUP BY orgnzid)
+          WHERE ao.psnnlbatchid = #{value}
+    </update>
+    <select id="selectPsnnlUserList" parameterType="String" resultType="java.util.Map">
+        SELECT p.userid
+             , TO_CHAR(pb.dt, 'yyyy-mm-dd') AS ppmntBatch
+             , p.orgnzid
+             , p.rankcodeid
+             , p.psnnlbatchid
+             , IF(p.orgnzid = u.orgnzid, 'N', 'Y') AS orgnzChangeYn
+             , IF(p.rankcodeid = u.rankcodeid, 'N', 'Y') AS rankChangYn
+          FROM psnnl p
+         INNER join psnnl_batch pb
+            ON p.psnnlbatchid = pb.psnnlbatchid
+         INNER JOIN [user] u
+            ON p.userid = u.userid
+         WHERE p.psnnlbatchid = #{value}
+           AND p.orgnzid IS NOT NULL
+    </select>
+
+
+    <update id="updateEnddt" parameterType="User">
+        UPDATE psnnl
+           SET moddate = NOW()
+             , enddt = ADDDATE(#{ppmntBatch}, -1)
+         WHERE userid = #{userId}
+           AND psnnlbatchid = (SELECT max(psnnlBatchId)
+                                 FROM psnnl
+                                WHERE userid = #{userId}
+                                <if test="psnnlBatchId != null and psnnlBatchId != ''"> AND psnnlBatchId != #{psnnlBatchId}</if>
+                                )
+    </update>
+
+    <insert id="insertDemand" parameterType="User">
+        INSERT INTO psnnl
+        ( psnnlbatchid
+        , userid
+        , startdt
+        , orgnzid
+        , prmtcodeid
+        , targetcodeid
+        , regdate
+        , moddate
+        ) VALUES
+        ( #{psnnlBatchId}
+        , #{userId}
+        , #{ppmntBatch}
+        , #{orgnzId}
+        , #{prmtCodeId}
+        , #{targetCodeId}
+        , NOW()
+        , NOW()
+        )
+    </insert>
+
+    <!--
+    ================================= apply_orgnz =================================
+     -->
+     <select id="selectApplOrgnzList" parameterType="Psnnl" resultType="ApplyOrgnz">
+        SELECT AO.orgnzid||'' AS orgnzId
+             , AO."level"
+             , O.name AS orgnzName
+             , AO.passScore
+          FROM (SELECT *
+                  FROM apply_orgnz
+                 WHERE userId = #{userId}
+                   AND psnnlBatchId = #{psnnlBatchId}) AO
+         INNER JOIN orgnz O
+            ON AO.orgnzid = O.orgnzid
+         INNER JOIN (SELECT *
+                       FROM psnnl
+                      WHERE userId = #{userId}
+                        AND psnnlBatchId = #{psnnlBatchId}) P
+            ON AO.userId = P.userid
+           AND AO.psnnlBatchId = P.psnnlBatchId
+         WHERE AO."level" &lt; P.orgnzRank
+
+         ORDER BY AO."level"
+    </select>
+
+    <insert id="insertApplOrgnz" parameterType="Psnnl">
+        INSERT INTO apply_orgnz
+        ( userId
+        , psnnlBatchId
+        , orgnzId
+        , "level"
+        , months
+        , staylevelyn
+        ) VALUES
+        <foreach item="item" collection="hopeOrgnz" separator=",">
+           ( #{userId}
+            , #{psnnlBatchId}
+            , #{item.orgnzId}
+            , #{item.level}
+            , SELECT SUM(TO_NUMBER(TRUNC(MONTHS_BETWEEN(enddt, startdt)))
+                          + (CASE WHEN (enddt - TO_DATE(CONCAT( DATE_FORMAT(DECODE(day(startdt) > day(enddt), TRUE, ADDDATE( enddt , INTERVAL -1 MONTH), enddt),'%Y%m'), DATE_FORMAT(startdt, '%d')), 'yyyymmdd')) > 15 THEN 1 ELSE 0 END )) AS months
+                FROM (SELECT p.orgnzId, p.startdt
+                           , NVL(p.enddt, to_date(#{startDt}, 'yyyy-mm-dd')) as enddt
+                        FROM psnnl p
+                       WHERE p.userid = #{userId}
+                         AND p.orgnzId = #{item.orgnzId}
+                         AND p.psnnlbatchid &lt;&gt; #{psnnlBatchId}
+                         AND NVL(p.targetcodeid, '') &lt;&gt; 'TGD005'
+                         )
+            , #{item.stayLevl}
+            )
+         </foreach>
+    </insert>
+
+    <delete id="deleteApplOrgnz" parameterType="Psnnl">
+        DELETE
+          FROM apply_orgnz
+         WHERE userId       = #{userId}
+           AND psnnlBatchId = #{psnnlBatchId}
+    </delete>
+
+    <delete id="deleteApplOrgnzNoTarget" parameterType="String">
+        DELETE
+          FROM apply_orgnz
+         WHERE psnnlBatchId = #{psnnlBatchId}
+           AND userid NOT IN (SELECT userid FROM psnnl WHERE psnnlBatchId = #{psnnlBatchId})
+    </delete>
+
+    <!--
+    ================================= SCHEDULE =================================
+     -->
+    <insert id="insertSchedule" parameterType="java.util.Map">
+        INSERT INTO schedule
+        ( userid
+        , rundt
+        , orgnzid
+        , rankcodeid
+        , orgnzchangeyn
+        , rankchangyn
+        , regdate
+        )VALUES
+        ( #{userid}
+        , #{rundt}
+        , #{orgnzid}
+        , #{rankcodeid}
+        , #{orgnzchangeyn}
+        , #{rankchangyn}
+        , NOW()
+        )
+    </insert>
+
+    <insert id="insertSelectSchedule" parameterType="String">
+        INSERT INTO schedule
+        ( userid
+        , rundt
+        , orgnzid
+        , rankcodeid
+        , orgnzchangeyn
+        , rankchangyn
+        , regdate)
+        SELECT p.userid
+             , pb.dt
+             , p.orgnzid
+             , p.rankcodeid
+             , IF(p.orgnzid = u.orgnzid, 'N', 'Y') AS orgnzChangeYn
+             , IF(p.rankcodeid = u.rankcodeid, 'N', 'Y') AS rankChangYn
+             , NOW()
+          FROM psnnl p
+         INNER join psnnl_batch pb
+            ON p.psnnlbatchid = pb.psnnlbatchid
+         INNER JOIN [user] u
+            ON p.userid = u.userid
+         WHERE p.psnnlbatchid = #{value}
+           AND p.orgnzid IS not NULL
+    </insert>
+
+</mapper>

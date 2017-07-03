@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.ac.ut.eHr.mapper.PsnnlBatchMapper">
+
+	<!--
+	================================= psnnl-batch =================================
+	 -->
+
+	<sql id="sqlSetRunYn">DECODE(#{statCodeId}, 'PST001', 'N', 'PST002', 'N', 'PST006', 'N', 'Y')</sql>
+	<sql id="sqlSearch">
+		 <where>
+		 	<if test="degree != null and degree != ''">			PB.degree = #{degree}</if>
+	        <if test="srchStartDt != null and srchStartDt !=''">AND PB.dt  &gt;= #{srchStartDt}</if>
+	        <if test="srchEndDt != null and srchEndDt != ''"> 	AND PB.dt  &lt;= #{srchEndDt}</if>
+		 	<if test="srchState != null and srchState != ''">	AND PB.statCodeId = #{srchState}</if>
+		 </where>
+	</sql>
+	<select id="selectList" parameterType="PsnnlBatch" resultType="PsnnlBatch">
+		SELECT PB.psnnlbatchid
+			 , PB.degree
+			 , PB.dt
+			 , NVL(P.cnt, 0) as targetnum
+			 , PB.statCodeId 
+			 , NVL(P.psnnlNum, 0) as psnnlNum
+		  FROM psnnl_batch PB
+          LEFT OUTER JOIN (SELECT psnnlBatchId, count(1) cnt, SUM(IF(orgnzid IS NOT NULL, 1, 0)) AS psnnlNum
+                             FROM psnnl
+                            GROUP BY psnnlBatchId) P
+            ON P.psnnlBatchId = PB.psnnlbatchid
+         <include refid="sqlSearch"></include>
+
+		 ORDER BY PB.psnnlbatchid DESC
+		 LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectListCnt" parameterType="PsnnlBatch" resultType="Integer">
+        SELECT COUNT(1)
+          FROM psnnl_batch PB
+         <include refid="sqlSearch"></include>
+    </select>
+
+	<select id="select" parameterType="String" resultType="PsnnlBatch">
+		SELECT PB.psnnlbatchid
+			 , PB.degree
+			 , PB.divcodeid
+			 , PB.instartdt
+			 , PB.inenddt
+			 , PB.dt
+			 , PB.statcodeid
+			 , (SELECT count(1)
+				  FROM psnnl
+				 WHERE psnnlbatchid = #{psnnlBatchId} ) As targetNum
+		  FROM psnnl_batch PB
+		 WHERE PB.psnnlbatchid = #{psnnlBatchId}
+	</select>
+
+	<insert id="insert" parameterType="PsnnlBatch">
+		INSERT INTO psnnl_batch
+		( degree
+		, divcodeid
+		<if test="inStartDt != null and inStartDt != ''">, instartdt</if>
+		<if test="inEndDt != null and inEndDt != ''">, inenddt</if>
+		, dt
+		, statcodeid
+		, runYn
+		, regdate
+		, moddate
+		) VALUES
+		( <choose>
+			<when test="degree != null and degree != ''">#{degree}</when>
+			<otherwise>
+				SELECT SUBSTR(#{dt}, 0, 4)||'-'||(MAX(TO_NUMBER(SUBSTR(degree, 6)))+1)
+			 	  FROM psnnl_batch
+				 WHERE SUBSTR(degree, 0,4) = SUBSTR(#{dt}, 0, 4)
+			</otherwise>
+		</choose>
+		, #{divCodeId}
+		<if test="inStartDt != null and inStartDt != ''">, #{inStartDt}</if>
+		<if test="inEndDt != null and inEndDt != ''">, #{inEndDt}</if>
+		, #{dt}
+		, #{statCodeId}
+		, <include refid="sqlSetRunYn"/>
+		, NOW()
+		, NOW()
+		)
+
+		<selectKey resultType="String" keyProperty="psnnlBatchId" order="AFTER">
+        	SELECT psnnl_batch_ai_psnnlbatchid.current_value FROM db_root
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="PsnnlBatch">
+		UPDATE psnnl_batch
+		   SET moddate   = NOW()
+		   	 , degree	 = #{degree}
+			 , divcodeid = #{divCodeId}
+			 , instartdt = #{inStartDt}
+			 , inenddt   = #{inEndDt}
+			 , dt        = #{dt}
+			 , statcodeid = #{statCodeId}
+			 , runYn 	 = <include refid="sqlSetRunYn"/>
+		 WHERE psnnlBatchId = #{psnnlBatchId}
+	</update>
+
+	<delete id="delete" parameterType="String">
+		DELETE
+		  FROM psnnl_batch
+		 WHERE psnnlBatchId = #{psnnlBatchId}
+	</delete>
+	<delete id="deletePsnnlManual" parameterType="String">
+		DELETE
+		  FROM psnnl_manual
+		 WHERE psnnlBatchId = #{psnnlBatchId}
+	</delete>
+	<delete id="deletePsnnl" parameterType="String">
+		DELETE
+		  FROM psnnl
+		 WHERE psnnlBatchId = #{psnnlBatchId}
+	</delete>
+	<delete id="deleteApplOrgnz" parameterType="String">
+		DELETE
+		  FROM apply_orgnz
+		 WHERE psnnlBatchId = #{psnnlBatchId}
+	</delete>
+
+	<select id="selectDegreeComboList" parameterType="String" resultType="Code">
+		SELECT DISTINCT degree AS codeId
+             , degree AS codeName
+             , psnnlbatchid AS cateCodeId
+		 FROM psnnl_batch
+		<if test="value != null and value != ''">
+			WHERE divcodeid = #{value}
+		</if>
+	</select>
+
+
+
+	<select id="selectRunPsnnlBatch" resultType="PsnnlBatch">
+		SELECT *
+		  FROM psnnl_batch
+		 WHERE statcodeid != 'PST006'
+	</select>
+
+	<select id="countHopeOrgnzCheck" parameterType="String" resultType="Integer">
+		SELECT COUNT(1) AS cnt
+		  FROM psnnl p
+		  LEFT OUTER JOIN ( SELECT psnnlbatchid, userid, count(1) AS cnt
+						      FROM apply_orgnz
+						     GROUP BY psnnlbatchid, userid) ao
+		    ON p.userid = ao.userid
+		   AND p.psnnlbatchid = ao.psnnlbatchid
+		 WHERE p.psnnlbatchid =  #{value}
+		   AND NVL(ao.cnt, 0) &lt;&gt; (SELECT COUNT(1) FROM orgnz WHERE applorgnzyn = 'Y')
+	</select>
+</mapper>

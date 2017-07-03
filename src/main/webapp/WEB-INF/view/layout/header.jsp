@@ -16,7 +16,7 @@
 	<script type="text/javascript" src="/js/jquery/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="/js/jquery/jquery-ui.min.js"></script>
     <!-- <script type="text/javascript" src="/js/jquery/jquery.easing.1.3.js"></script> -->
-	<script type="text/javascript" src="/js/common/common.js?v=1.41"></script>
+	<script type="text/javascript" src="/js/common/common.js?v=1.42"></script>
 
     <title>충청남도소방본부 소방공무원 인사배치 시스템</title>
 

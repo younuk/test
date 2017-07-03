@@ -259,7 +259,7 @@ function cmmPopup(pWidth, pHeight){
 	var winT = (screen.height-pHeight)/2;
 	var winL = (screen.width-pWidth)/2;
 
-	return "width="+pWidth+", height="+pHeight+", top="+winT+", left="+winL+", resizable=no, scrollbars=no, status=no, location=no;";
+	return "width="+pWidth+", height="+pHeight+", top="+winT+", left="+winL+", resizable=no, scrollbars=yes, status=no, location=no;";
 }
 
 

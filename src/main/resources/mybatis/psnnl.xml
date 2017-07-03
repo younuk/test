@@ -237,9 +237,11 @@
               SET disstsflevel = (SELECT TO_CHAR(ROUND(AVG(disstsflevel)*0.8, 5))
                                     FROM psnnl
                                    WHERE psnnlbatchid = #{psnnlBatchId}
-                                     AND NVL(disstsflevel, '') != '')
+                                     AND NVL(disstsflevel, '') != ''
+                                     AND rankcodeid = (SELECT p2.rankcodeid FROM psnnl p2 WHERE p2.psnnlbatchid = #{value} AND p2.userid = p.userid)
+                                 )
             WHERE psnnlbatchid = #{psnnlBatchId}
-              AND NVL(disstsflevel, '') = ''
+              AND NVL(disstsflevel, 0.00000) = 0.00000
     </update>
 
     <select id="selectBatchSpecialDutyCnt" resultType="Integer" parameterType="String">
@@ -342,7 +344,8 @@
                                   FROM psnnl p
                                  WHERE psnnlbatchid = #{value}
                                    AND p.orgnzid = ao.orgnzid
-                                 GROUP BY orgnzid)
+                                   AND p.rankcodeid = (SELECT p2.rankcodeid FROM psnnl p2 WHERE p2.psnnlbatchid = #{value} AND p2.userid = ao.userid)
+                                )
           WHERE ao.psnnlbatchid = #{value}
     </update>
     <select id="selectPsnnlUserList" parameterType="String" resultType="java.util.Map">
@@ -401,6 +404,19 @@
     ================================= apply_orgnz =================================
      -->
      <select id="selectApplOrgnzList" parameterType="Psnnl" resultType="ApplyOrgnz">
+        SELECT AO.orgnzid||'' AS orgnzId
+             , AO."level"
+             , O.name AS orgnzName
+             , AO.passScore
+          FROM (SELECT *
+                  FROM apply_orgnz
+                 WHERE userId = #{userId}
+                   AND psnnlBatchId = #{psnnlBatchId}) AO
+         INNER JOIN orgnz O
+            ON AO.orgnzid = O.orgnzid
+         ORDER BY AO."level"
+    </select>
+     <select id="selectApplOrgnzDisstsList" parameterType="Psnnl" resultType="ApplyOrgnz">
         SELECT AO.orgnzid||'' AS orgnzId
              , AO."level"
              , O.name AS orgnzName

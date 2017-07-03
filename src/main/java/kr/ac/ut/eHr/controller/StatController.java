@@ -98,6 +98,7 @@ public class StatController {
         model.addAttribute("resultList", service.selectAvg(paramVo));
         model.addAttribute("degreeCombo", degreeList);
         model.addAttribute("orgnzCombo", orgnzService.selectComboList("Y"));
+        model.addAttribute("rankCombo", codeService.selectList("RNK"));
         model.addAttribute("spcDutyCombo", codeService.selectList("SPD"));
         model.addAttribute("srchInfo", paramVo);
     }

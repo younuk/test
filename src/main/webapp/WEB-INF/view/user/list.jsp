@@ -16,6 +16,9 @@ $(document).ready(function(){
         	cmmPage(document.userSearchVo, 1);
         }
     });
+	$("#userSearchVo select").change(function() {
+		cmmPage(document.userSearchVo, 1);
+    });
 
 	$(".tbody tr td").click(function(){
 		if($(this).index() < 7){
@@ -137,6 +140,10 @@ function fnPrintPage(param){
 						<td><form:select path="rankCodeId" items="${rankCombo}"/></td>
 						<th scope="col">특수직무</th>
 						<td><form:select path="specialDutyCodeId" items="${spcDutyCombo}"/></td>
+					</tr>
+					<tr>
+						<th scope="col">인사일시</th>
+						<td colspan="3"><form:input path="srchStartDt" class="calendar"/> - <form:input path="srchEndDt" class="calendar"/></td>
 					</tr>
 				</tbody>
 			</table>

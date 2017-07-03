@@ -6,6 +6,11 @@
 $(document).ready(function(){
 	cmmSetMenu("sideStatMng", 2);	//set menu
 
+	$("#statSearchForm select").change(function() {
+		document.statSearchForm.action = "<c:url value='/stat/selectInOut.do' />";
+		document.statSearchForm.submit();
+    });
+
 	$("#btnSearch").click(function(){
 		document.statSearchForm.action = "<c:url value='/stat/selectInOut.do' />";
 		document.statSearchForm.submit();
@@ -28,7 +33,7 @@ $(document).ready(function(){
 		</div>
 	</header>
 	<article id="contents">
-		<form name="statSearchForm" class="search" method="post" onsubmit="return false;">
+		<form name="statSearchForm" id="statSearchForm" class="search" method="post" onsubmit="return false;">
 		<fieldset>
 			<table class="table">
                 <colgroup>
@@ -111,21 +116,21 @@ $(document).ready(function(){
 				</tr>
 				<tr>
 					<th scope="col">소계</th>
-					<th scope="col">소방정</th>
-					<th scope="col">소방령</th>
-					<th scope="col">소방경</th>
-					<th scope="col">소방위</th>
-					<th scope="col">소방장</th>
-					<th scope="col">소방교</th>
 					<th scope="col">소방사</th>
+					<th scope="col">소방교</th>
+					<th scope="col">소방장</th>
+					<th scope="col">소방위</th>
+					<th scope="col">소방경</th>
+					<th scope="col">소방령</th>
+					<th scope="col">소방정</th>
 					<th scope="col">소계</th>
-					<th scope="col">소방정</th>
-					<th scope="col">소방령</th>
-					<th scope="col">소방경</th>
-					<th scope="col">소방위</th>
-					<th scope="col">소방장</th>
-					<th scope="col">소방교</th>
 					<th scope="col">소방사</th>
+					<th scope="col">소방교</th>
+					<th scope="col">소방장</th>
+					<th scope="col">소방위</th>
+					<th scope="col">소방경</th>
+					<th scope="col">소방령</th>
+					<th scope="col">소방정</th>
 				</tr>
 			</thead>
 			<tbody class="tbody">
@@ -188,7 +193,7 @@ $(document).ready(function(){
 					<td>${result.outrnk007}</td>
 				</tr>
 				</c:forEach>
-				<tr>
+				<tr style="background-color: #ebebeb;">
 					<td>총계</td>
 					<td>${total01}</td>
 					<td>${total02}</td>

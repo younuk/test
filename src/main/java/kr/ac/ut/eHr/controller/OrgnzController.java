@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import egovframework.rte.ptl.mvc.tags.ui.pagination.PaginationInfo;
 import kr.ac.ut.eHr.common.CommonUtil;
 import kr.ac.ut.eHr.common.StringUtil;
 import kr.ac.ut.eHr.domain.Orgnz;
@@ -26,9 +25,9 @@ public class OrgnzController {
     @RequestMapping(value = "/list.do")
     public void list(OrgnzSearch paramVo, ModelMap model) {
 
-        PaginationInfo paginationInfo = CommonUtil.setPageParam(paramVo);
+        /*PaginationInfo paginationInfo = CommonUtil.setPageParam(paramVo);
         paginationInfo.setTotalRecordCount(service.selectListCnt(paramVo));
-        model.addAttribute("paginationInfo", paginationInfo);
+        model.addAttribute("paginationInfo", paginationInfo);*/
 
         model.addAttribute("resultList", service.selectList(paramVo));
         model.addAttribute("orgnzSearchVo", paramVo);

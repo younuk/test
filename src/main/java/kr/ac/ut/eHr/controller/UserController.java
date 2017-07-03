@@ -211,7 +211,7 @@ public class UserController {
         LoginDetail user = CommonUtil.getLoginDetail();
 
         Map<String, Object> info = new HashMap<String, Object>();
-        info.put("result", (service.updateStay5(user.getUserAuth(), "CLEAR") > 0)? "success": "fail");
+        info.put("result", (service.updateStay5(user.getUserid(), "CLEAR") > 0)? "success": "fail");
 
         JsonUtil jsonUtil = new JsonUtil(info);
         return jsonUtil.toJson();

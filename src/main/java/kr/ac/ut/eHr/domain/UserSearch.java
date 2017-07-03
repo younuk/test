@@ -7,9 +7,23 @@ public class UserSearch extends Page{
     private String targetYn;
     private String rankCodeId;
     private String specialDutyCodeId;
+    private String srchStartDt;
+    private String srchEndDt;
 
     private String userId;
 
+    public String getSrchStartDt() {
+        return srchStartDt;
+    }
+    public void setSrchStartDt(String srchStartDt) {
+        this.srchStartDt = srchStartDt;
+    }
+    public String getSrchEndDt() {
+        return srchEndDt;
+    }
+    public void setSrchEndDt(String srchEndDt) {
+        this.srchEndDt = srchEndDt;
+    }
     public String getUserId() {
         return userId;
     }

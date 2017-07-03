@@ -66,7 +66,7 @@ function fnSign(){
 				var url = "<c:url value='/auth/changePasswordPage.do'/>"
 					 + "?loginId="+$("#userid").val();
 				 $("#userpw").val("");
-				window.open(url, "popPassword", cmmPopup(450, 348));
+				window.open(url, "popPassword", cmmPopup(450, 350));
 			}else{
 				var url = body.response.url;
 	        	window.location = body.response.url;

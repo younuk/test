@@ -22,7 +22,7 @@
 		<!-- <property name="url" value="jdbc:cubrid:localhost:30000:eHR:::"/>
 		<property name="username" value="utadmin"/>
 		<property name="password" value="eHR119!Q@W#E"/> -->
-		<property name="url" value="jdbc:cubrid:localhost:33000:eHR3:::"/>
+		<property name="url" value="jdbc:cubrid:localhost:33000:eHR:::"/>
 		<property name="username" value="dba"/>
 		<property name="password" value="ehradmin123!@#"/>
 	</bean>

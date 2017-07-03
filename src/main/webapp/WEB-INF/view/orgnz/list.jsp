@@ -1,14 +1,22 @@
 <%@ page contentType="text/html; charset=utf-8" session="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
 <jsp:include page="../layout/header.jsp" />
 
 <script type="text/javascript">
 $(document).ready(function(){
 	cmmSetMenu("sideUserMng", 1);	//set menu
 
-	$(".tbody tr").click(function(){
+	$("#orgnzSearchVo input").keypress(function(e) {
+        if (e.keyCode == 13){
+        	cmmPage(document.orgnzSearchVo, 1);
+        }
+    });
+	$("#orgnzSearchVo select").change(function() {
+		cmmPage(document.orgnzSearchVo, 1);
+    });
+
+	$(".tbody tr").not(":last").click(function(){
 		document.orgnzSearchVo.orgnzId.value = $(this).attr("id")
 		document.orgnzSearchVo.action = "<c:url value='/orgnz/view.do'/>";
 		document.orgnzSearchVo.submit();
@@ -54,13 +62,13 @@ function fnPage(pageNo){
 						<th scope="col">관서명</th>
 						<td><form:select path="srchOrgnzId" items="${orgnzCombo}"/></td>
 						<th scope="col">정원</th>
-						<td><form:input path="srchNrmCntStart"/>~<form:input path="srchNrmCntEnd"/></td>
+						<td><form:input path="srchNrmCntStart" class="w10p"/>~<form:input path="srchNrmCntEnd" class="w10p"/></td>
 					</tr>
 					<tr>
 						<th scope="col">배치가능인원</th>
-						<td><form:input path="srchNowCntStart"/>~<form:input path="srchNowCntEnd"/></td>
+						<td><form:input path="srchNowCntStart" class="w10p"/>~<form:input path="srchNowCntEnd" class="w10p"/></td>
 						<th scope="col">강제결원</th>
-						<td><form:input path="srchVccCntStart"/>~<form:input path="srchVccCntEnd"/></td>
+						<td><form:input path="srchVccCntStart" class="w10p"/>~<form:input path="srchVccCntEnd" class="w10p"/></td>
 					</tr>
 				</tbody>
 			</table>
@@ -107,7 +115,7 @@ function fnPage(pageNo){
 					<td>${result.nowTotal }</td>
 				</tr>
 				</c:forEach>
-				<tr>
+				<tr style="background-color: #ebebeb;">
 					<td>총계</td>
 					<td>${total01}</td>
 					<td>${total02}</td>
@@ -121,12 +129,6 @@ function fnPage(pageNo){
 				</c:if>
 			</tbody>
 		</table>
-
-		<c:if test="${paginationInfo.totalRecordCount != 0}">
-		<div class="pagination">
-			<ui:pagination paginationInfo = "${paginationInfo}" type="image" jsFunction="fnPage" />
-		</div>
-		</c:if>
 	</article>
 </main>
 <jsp:include page="../layout/footer.jsp" />

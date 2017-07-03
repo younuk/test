@@ -50,6 +50,7 @@ public interface PsnnlMapper {
      * ================================= apply_orgnz =================================
      */
     List<ApplyOrgnz> selectApplOrgnzList(Psnnl paramVo);
+    List<ApplyOrgnz> selectApplOrgnzDisstsList(Psnnl paramVo);
     int insertApplOrgnz(Psnnl paramVo);
     int deleteApplOrgnz(Psnnl paramVo);
     int deleteApplOrgnzNoTarget(String param);

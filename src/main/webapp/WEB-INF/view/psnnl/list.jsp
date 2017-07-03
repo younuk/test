@@ -12,10 +12,21 @@ $(document).ready(function(){
 
 	$(".calendar").datepicker(datepickerOption);
 
-	$(".tbody tr").click(function(){
-		document.psnnlSearchVo.psnnlId.value = $(this).attr("id");
-		document.psnnlSearchVo.action = "<c:url value='/psnnl/view.do'/>";
-		document.psnnlSearchVo.submit();
+	$("#psnnlSearchVo input").keypress(function(e) {
+        if (e.keyCode == 13){
+        	cmmPage(document.psnnlSearchVo, 1);
+        }
+    });
+	$("#psnnlSearchVo select").change(function() {
+		cmmPage(document.psnnlSearchVo, 1);
+    });
+
+	$(".tbody tr td").click(function(){
+		if($(this).index() < 7){
+			document.psnnlSearchVo.psnnlId.value = $(this).parent().attr("id");
+			document.psnnlSearchVo.action = "<c:url value='/psnnl/view.do'/>";
+			document.psnnlSearchVo.submit();
+		}
 	});
 
 	$("#btnSearch").click(function(){
@@ -86,6 +97,7 @@ function fnPage(pageNo){
 			<br/>
 			<input type="button" value="조회" class="btn" id="btnSearch" />
 			<form:hidden path="psnnlId"/>
+			<form:hidden path="pageIndex" />
 		</fieldset>
 		</form:form>
 

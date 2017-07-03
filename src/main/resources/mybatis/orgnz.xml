@@ -33,8 +33,8 @@
 		<include refid="sqlSearch"/>
 
 
-		 ORDER BY o.name
-		 LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+		 ORDER BY name
+		 <!-- LIMIT #{recordCountPerPage} OFFSET #{firstIndex} -->
 	</select>
 
 

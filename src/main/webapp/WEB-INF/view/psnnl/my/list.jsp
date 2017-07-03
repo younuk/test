@@ -11,7 +11,7 @@ $(document).ready(function(){
 	$(".calendar").datepicker(datepickerOption);
 
 	$(".tbody tr td").click(function(){
-		if($(this).index() < 6){
+		if($(this).index() < 7){
 			document.psnnlSearchVo.psnnlId.value = $(this).parent().attr("id")
 			document.psnnlSearchVo.action = "<c:url value='/psnnl/my/view.do'/>";
 			document.psnnlSearchVo.submit();
@@ -26,7 +26,7 @@ $(document).ready(function(){
 		var url = "<c:url value='/psnnl/my/popDetail.do'/>"
 				 + "?psnnlBatchId="+$(this).parent().parent().attr("pbi")
 				 + "&userId="+$(this).parent().parent().attr("uid");
-		window.open(url, "popDetailPopup", cmmPopup(450, 600));
+		window.open(url, "popDetailPopup", cmmPopup(448, 600));
 	});
 });
 

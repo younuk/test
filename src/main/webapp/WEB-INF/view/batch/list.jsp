@@ -10,6 +10,15 @@ $(document).ready(function(){
 
 	$(".calendar").datepicker(datepickerOption);
 
+	$("#psnnlSearchVo input").keypress(function(e) {
+        if (e.keyCode == 13){
+        	cmmPage(document.psnnlSearchVo, 1);
+        }
+    });
+	$("#psnnlSearchVo select").change(function() {
+		cmmPage(document.psnnlSearchVo, 1);
+    });
+
 	$(".tbody tr").click(function(){
 		document.psnnlSearchVo.psnnlBatchId.value = $(this).attr("id")
 		document.psnnlSearchVo.action = "<c:url value='/batch/view.do'/>";

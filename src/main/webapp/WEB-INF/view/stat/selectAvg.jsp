@@ -6,6 +6,11 @@
 $(document).ready(function(){
 	cmmSetMenu("sideStatMng", 3);	//set menu
 
+	$("#statSearchForm select").change(function() {
+		document.statSearchForm.action = "<c:url value='/stat/selectAvg.do' />";
+		document.statSearchForm.submit();
+    });
+
 	$("#btnSearch").click(function(){
 		document.statSearchForm.action = "<c:url value='/stat/selectAvg.do' />";
 		document.statSearchForm.submit();
@@ -28,7 +33,7 @@ $(document).ready(function(){
 		</div>
 	</header>
 	<article id="contents">
-		<form name="statSearchForm" class="search" method="post" onsubmit="return false;">
+		<form name="statSearchForm" id="statSearchForm" class="search" method="post" onsubmit="return false;">
 		<fieldset>
 			<table class="table">
                 <colgroup>
@@ -51,6 +56,24 @@ $(document).ready(function(){
                         		<option value="">선택</option>
                         		<c:forEach var="result" items="${orgnzCombo}">
                         			<option value="${result.orgnzId}" <c:if test="${srchInfo.srchOrgnz eq result.orgnzId}">selected</c:if>>${result.name}</option>
+                        		</c:forEach>
+                        	</select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="col">계급</th>
+                        <td><select name="srchRank">
+                        		<option value="">선택</option>
+                        		<c:forEach var="result" items="${rankCombo}">
+                        			<option value="${result.codeId}" <c:if test="${srchInfo.srchRank eq result.codeId}">selected</c:if>>${result.codeName}</option>
+                        		</c:forEach>
+                        	</select>
+                        </td>
+                        <th scope="col">특수직무</th>
+                        <td><select name="srchSpecial">
+                        		<option value="">선택</option>
+                        		<c:forEach var="result" items="${spcDutyCombo}">
+                        			<option value="${result.codeId}" <c:if test="${srchInfo.srchSpecial eq result.codeId}">selected</c:if>>${result.codeName}</option>
                         		</c:forEach>
                         	</select>
                         </td>

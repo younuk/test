@@ -71,7 +71,7 @@ public class PsnnlController {
 
     @RequestMapping(value = "/my/popDetail.do")
     public void popDetail(Psnnl paramVo, ModelMap model) {
-        model.addAttribute("resultList", service.selectApplOrgnzList(paramVo));
+        model.addAttribute("resultList", service.selectApplOrgnzDisstsList(paramVo));
     }
 
     @RequestMapping(value = "/popDemand.do")

@@ -22,17 +22,19 @@
 
     <http auto-config="true" name="securityHttp" pattern="/**" use-expressions="true" realm="Login" authentication-manager-ref="authenticationManager">
         <intercept-url pattern="/login.do" access="permitAll" />
+        <intercept-url pattern="/admin/logout" access="permitAll" />
         <intercept-url pattern="/auth/*.do" access="permitAll" />
-        <intercept-url pattern="/**/*" access="isAuthenticated()" />
-
-        <!-- <intercept-url pattern="/api/batchapi.do" access="permitAll" />
-        <intercept-url pattern="/api/batchhistory.do" access="permitAll" />
-        <intercept-url pattern="/main/pwdView.do" access="permitAll" />
-        <intercept-url pattern="/main/pwdSave.do" access="permitAll" />
-        <intercept-url pattern="/main/servercheck.do" access="permitAll" />
-        <intercept-url pattern="/api/logapi.do" access="permitAll" />
-        <intercept-url pattern="/api/logbatch.do" access="permitAll" />
-        <intercept-url pattern="/main/sysapi.do" access="permitAll" /> -->
+        <intercept-url pattern="/user/my/view.do" access="isAuthenticated()" />
+        <intercept-url pattern="/user/changePwd.do" access="isAuthenticated()" />
+        <intercept-url pattern="/user/changeStay5.do" access="isAuthenticated()" />
+        <intercept-url pattern="/user/*.do" access="hasAnyRole('ROL001','ROL002')" />
+        <intercept-url pattern="/user/**" access="isAuthenticated()" />
+        <intercept-url pattern="/psnnl/my/*.do" access="isAuthenticated()" />
+        <intercept-url pattern="/psnnl/*.do" access="hasAnyRole('ROL001','ROL002')" />
+        <intercept-url pattern="/orgnz/**" access="hasRole('ROL001')" />
+        <intercept-url pattern="/batch/**" access="hasRole('ROL001')" />
+        <intercept-url pattern="/stat/**" access="hasRole('ROL001')" />
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
 
 
         <form-login login-page="/login.do"
@@ -41,12 +43,7 @@
                 password-parameter="userpw"
                 always-use-default-target="false"
                 authentication-failure-handler-ref="userAuthenticationFailureHandler"
-                authentication-success-handler-ref="userAuthenticationSuccessHandler"
-                />
-                <!--
-                login-processing-url="/login"
-                default-target-url="/"
-                 -->
+                authentication-success-handler-ref="userAuthenticationSuccessHandler"/>
          <logout logout-url="/admin/logout"
                 logout-success-url="/"
                 delete-cookies="JSESSIONID" invalidate-session="true" />
@@ -54,25 +51,5 @@
 
     <beans:bean id="userAuthenticationFailureHandler" class="kr.ac.ut.eHr.auth.UserAuthenticationFailureHandler"/>
     <beans:bean id="userAuthenticationSuccessHandler" class="kr.ac.ut.eHr.auth.UserAuthenticationSuccessHandler"/>
-<!-- 	<sec:http use-expressions="true">
-		<sec:intercept-url pattern="/admin/**" access="hasAuthority('ROLE_ADMIN')" />
-		<sec:intercept-url pattern="/manager/**" access="hasRole('ROLE_MANAGER')" />
-		<sec:intercept-url pattern="/member/**" access="isAuthenticated()" />
-		<sec:intercept-url pattern="/**" access="permitAll"/>
-		<sec:form-login />
-		<sec:logout />
-	</sec:http>
 
-	<sec:authentication-manager>
-		<sec:authentication-provider>
-			<sec:user-service>
-				<sec:user name="bkchoi" password="1234"
-				          authorities="ROLE_USER" />
-				<sec:user name="manager" password="qwer"
-				          authorities="ROLE_MANAGER" />
-				<sec:user name="admin" password="asdf"
-				          authorities="ROLE_ADMIN,ROLE_USER" />
-			</sec:user-service>
-		</sec:authentication-provider>
-	</sec:authentication-manager> -->
 </beans:beans>

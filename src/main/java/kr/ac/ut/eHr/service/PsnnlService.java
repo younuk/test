@@ -20,5 +20,5 @@ public interface PsnnlService {
     /*
      * ================================= apply_orgnz =================================
      */
-    List<ApplyOrgnz> selectApplOrgnzList(Psnnl paramVo);
+    List<ApplyOrgnz> selectApplOrgnzDisstsList(Psnnl paramVo);
 }

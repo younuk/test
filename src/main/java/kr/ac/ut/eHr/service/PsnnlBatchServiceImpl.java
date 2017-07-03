@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.ac.ut.eHr.common.DateUtil;
 import kr.ac.ut.eHr.domain.Code;
-import kr.ac.ut.eHr.domain.Orgnz;
 import kr.ac.ut.eHr.domain.Psnnl;
 import kr.ac.ut.eHr.domain.PsnnlBatch;
 import kr.ac.ut.eHr.domain.User;
@@ -153,7 +152,7 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
 
 
 
-        List<Orgnz> oList = oMapper.selectComboList("Y");
+        //List<Orgnz> oList = oMapper.selectComboList("Y");
         //for(Orgnz oVo: oList){
         //Orgnz oVo = new Orgnz();
         //oVo.setOrgnzId("79");
@@ -219,7 +218,7 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
         }
 
         // 3. 합격선 저장
-        //pMapper.updateBatchPassScore(paramVo.getPsnnlBatchId());
+        pMapper.updateBatchPassScore(paramVo.getPsnnlBatchId());
     }
 
     @Transactional

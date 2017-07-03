@@ -116,7 +116,7 @@ table.table tbody tr td{
 		</div>
 	</main>
 	</form>
-	<footer id="footer" style="bottom:0px;width:90%;">
+	<footer id="footer" style="position:absolute;bottom:0px;left:0px;right:0px;">
 		<input type="button" value="저장" class="btn" id="btnSave"/>
 		<input type="button" value="닫기" class="btn" onclick="window.close();"/>
 	</footer>

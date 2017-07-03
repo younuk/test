@@ -107,14 +107,19 @@
              , nvl(o1.outrnk005,0) AS outrnk005
              , nvl(o1.outrnk006,0) AS outrnk006
              , nvl(o1.outrnk007,0) AS outrnk007
-          FROM (select * from orgnz <if test="srchOrgnz != null and srchOrgnz != ''">WHERE orgnzid = #{srchOrgnz}</if>) o
+          FROM (SELECT *
+                  FROM orgnz
+                 WHERE applorgnzyn = 'Y'
+                 <if test="srchOrgnz != null and srchOrgnz != ''">
+                    AND orgnzid = #{srchOrgnz}
+                 </if>) o
           LEFT OUTER JOIN (SELECT orgnzid
                                 , MAX(rnk001) AS rnk001, MAX(rnk002) AS rnk002, MAX(rnk003) AS rnk003, MAX(rnk004) AS rnk004, MAX(rnk005) AS rnk005, MAX(rnk006) AS rnk006, MAX(rnk007) AS rnk007
                                 , MAX(outrnk001) AS outrnk001, MAX(outrnk002) AS outrnk002, MAX(outrnk003) AS outrnk003, MAX(outrnk004) AS outrnk004, MAX(outrnk005) AS outrnk005, MAX(outrnk006) AS outrnk006, MAX(outrnk007) AS outrnk007
                             FROM (SELECT orgnzid1 AS orgnzid
                                        , SUM(rnk001) AS rnk001, SUM(rnk002) AS rnk002,  SUM(rnk003) AS rnk003, SUM(rnk004) AS rnk004, SUM(rnk005) AS rnk005, SUM(rnk006) AS rnk006, SUM(rnk007) AS rnk007
                                        , NULL AS outrnk001, NULL AS outrnk002, NULL AS outrnk003, null AS outrnk004, null AS outrnk005, null AS outrnk006, null AS outrnk007
-                                    FROM (SELECT userid
+                                    FROM (SELECT p.userid
                                               , MAX(IF(RANK =1, orgnzid, null)) orgnzid1
                                               , MAX(IF(RANK =2, orgnzid, null)) orgnzid2
                                               , SUM(IF(RANK =1 AND rankcodeid = 'RNK001', 1, 0)) AS rnk001
@@ -126,10 +131,22 @@
                                               , SUM(IF(RANK =1 AND rankcodeid = 'RNK007', 1, 0)) AS rnk007
                                            FROM (SELECT p.*, DENSE_RANK() over(PARTITION BY userid ORDER BY startdt desc) AS RANK
                                                    FROM psnnl p
-                                                  WHERE userid IN (SELECT userid FROM psnnl WHERE psnnlbatchid = #{srchDegree} AND orgnzid IS NOT NULL)
-                                                 )
+                                                  WHERE p.userid IN (SELECT userid
+                                                                       FROM psnnl
+                                                                      WHERE psnnlbatchid = #{srchDegree}
+                                                                        AND orgnzid IS NOT NULL
+                                                                     )
+                                                  <if test="srchRank != null and srchRank != ''">
+                                                    AND p.rankcodeid = #{srchRank}
+                                                  </if>
+                                                 ) p
+                                          <if test="srchSpecial != null and srchSpecial != '' ">
+                                          INNER JOIN (select userid,specialDutyCodeId from [user]) u
+                                             ON p.userid = u.userid
+                                            AND u.specialDutyCodeId = #{srchSpecial}
+                                          </if>
                                           WHERE RANK &lt;=2
-                                          GROUP BY userid
+                                          GROUP BY p.userid
                                           )
                                    WHERE orgnzid1 &lt;> orgnzid2
                                    GROUP BY orgnzid1
@@ -137,7 +154,7 @@
                                   SELECT orgnzid2 AS orgnzid
                                        , NULL, NULL, NULL, NULL, NULL, NULL, NULL
                                        , SUM(rnk001) AS outrnk001, SUM(rnk002) AS outrnk002,  SUM(rnk003) AS outrnk003, SUM(rnk004) AS outrnk004, SUM(rnk005) AS outrnk005, SUM(rnk006) AS outrnk006, SUM(rnk007) AS outrnk007
-                                    FROM (SELECT userid
+                                    FROM (SELECT p.userid
                                                , MAX(IF(RANK =1, orgnzid, null)) orgnzid1
                                                , MAX(IF(RANK =2, orgnzid, null)) orgnzid2
                                                , SUM(IF(RANK =2 AND rankcodeid = 'RNK001', 1, 0)) AS rnk001
@@ -149,10 +166,21 @@
                                                , SUM(IF(RANK =2 AND rankcodeid = 'RNK007', 1, 0)) AS rnk007
                                             FROM (SELECT p.*, DENSE_RANK() over(PARTITION BY userid ORDER BY startdt desc) AS RANK
                                                     FROM psnnl p
-                                                   WHERE userid IN (SELECT userid FROM psnnl WHERE psnnlbatchid = #{srchDegree} AND orgnzid IS NOT NULL)
-                                                  )
+                                                   WHERE userid IN (SELECT userid
+                                                                      FROM psnnl
+                                                                     WHERE psnnlbatchid = #{srchDegree}
+                                                                       AND orgnzid IS NOT NULL)
+                                                   <if test="srchRank != null and srchRank != ''">
+                                                        AND p.rankcodeid = #{srchRank}
+                                                   </if>
+                                                  ) p
+                                          <if test="srchSpecial != null and srchSpecial != '' ">
+                                          INNER JOIN (select userid,specialDutyCodeId from [user]) u
+                                             ON p.userid = u.userid
+                                            AND u.specialDutyCodeId = #{srchSpecial}
+                                          </if>
                                            WHERE RANK &lt;=2
-                                           GROUP BY userid
+                                           GROUP BY p.userid
                                           )
                                    WHERE orgnzid1 &lt;> orgnzid2
                                    GROUP BY orgnzid2
@@ -176,10 +204,10 @@
                         AND u.orgnzid = #{srchOrgnz}
                     </if>
                     <if test="srchRank != null and srchRank != '' ">
-                        AND u.rankcodeid = #{(srchRank}
+                        AND u.rankcodeid = #{srchRank}
                     </if>
                     <if test="srchSpecial != null and srchSpecial != '' ">
-                        AND u.specialDutyCodeId = #{(srchSpecial}
+                        AND u.specialDutyCodeId = #{srchSpecial}
                     </if>
                   </if>
                  GROUP BY p.rankcodeid

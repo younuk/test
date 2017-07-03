@@ -1,10 +1,16 @@
 <%@ page contentType="text/html; charset=utf-8" session="false" %>
-<%@ taglib prefix="c"	 uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <jsp:include page="../layout/header.jsp" />
 
 <script type="text/javascript">
 $(document).ready(function(){
 	cmmSetMenu("sideStatMng", 1);	//set menu
+
+	$("#statSearchForm select").change(function() {
+		document.statSearchForm.action = "<c:url value='/stat/selectIn.do' />";
+		document.statSearchForm.submit();
+    });
 
 	$("#btnSearch").click(function(){
 		document.statSearchForm.action = "<c:url value='/stat/selectIn.do' />";
@@ -29,7 +35,7 @@ $(document).ready(function(){
 		</div>
 	</header>
 	<article id="contents">
-		<form name="statSearchForm" class="search" method="post" onsubmit="return false;">
+		<form name="statSearchForm" id="statSearchForm" class="search" method="post" onsubmit="return false;">
 		<fieldset>
 			<table class="table">
                 <colgroup>
@@ -177,24 +183,24 @@ $(document).ready(function(){
 					<td>${result.o16}</td>
 				</tr>
 				</c:forEach>
-				<tr>
+				<tr style="background-color: #ebebeb;">
 					<td>총계</td>
-					<td>${total01}</td>
-					<td>${total02}</td>
-					<td>${total03}</td>
-					<td>${total04}</td>
-					<td>${total05}</td>
-					<td>${total06}</td>
-					<td>${total07}</td>
-					<td>${total08}</td>
-					<td>${total09}</td>
-					<td>${total10}</td>
-					<td>${total11}</td>
-					<td>${total12}</td>
-					<td>${total13}</td>
-					<td>${total14}</td>
-					<td>${total15}</td>
-					<td>${total16}</td>
+					<td><fmt:formatNumber value="${total01}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total02}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total03}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total04}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total05}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total06}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total07}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total08}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total09}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total10}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total11}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total12}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total13}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total14}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total15}" pattern=".00000"/></td>
+					<td><fmt:formatNumber value="${total16}" pattern=".00000"/></td>
 				</tr>
 			</tbody>
 		</table>

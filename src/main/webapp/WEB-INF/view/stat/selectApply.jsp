@@ -6,6 +6,11 @@
 $(document).ready(function(){
 	cmmSetMenu("sideStatMng", 0);	//set menu
 
+	$("#statSearchForm select").change(function() {
+		document.statSearchForm.action = "<c:url value='/stat/selectApply.do' />";
+		document.statSearchForm.submit();
+    });
+
 	$("#btnSearch").click(function(){
 		document.statSearchForm.action = "<c:url value='/stat/selectApply.do' />";
 		document.statSearchForm.submit();
@@ -176,7 +181,7 @@ $(document).ready(function(){
 					<td>${result.o16}</td>
 				</tr>
 				</c:forEach>
-				<tr>
+				<tr style="background-color: #ebebeb;">
 					<td>총계</td>
 					<td>${total01}</td>
 					<td>${total02}</td>

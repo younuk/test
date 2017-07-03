@@ -146,7 +146,7 @@ $(document).ready(function(){
 						<c:set var="degreeInt" />
 						<c:if test="${not empty psnnlBatchVo.degree }">
 							<c:set var="degreeHeader">${fn:substring(psnnlBatchVo.degree,0,4) } -</c:set>
-							<c:set var="degreeInt">${fn:substring(psnnlBatchVo.degree,5, 7) }</c:set>
+							<c:set var="degreeInt">${fn:substring(psnnlBatchVo.degree, 5, fn:length(psnnlBatchVo.degree)) }</c:set>
 						</c:if>
 						<span id="spanDegreeheader">${degreeHeader }</span> <form:input path="degree" value="${degreeInt }" size="5"/>
 					</td>

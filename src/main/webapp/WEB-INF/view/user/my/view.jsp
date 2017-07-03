@@ -23,7 +23,7 @@ $(document).ready(function(){
 			alert("비밀번호가 일치하지 않습니다.");
 			return false;
 		}
-		if(!cmmChkPwd($("#password1")))	return false;
+		//if(!cmmChkPwd($("#password1")))	return false;
 
 		var data = cmmCallAjax("<c:url value='/user/changePwd.do'/>", {password:$("#password1").val()});
 		if(data.result == "success"){

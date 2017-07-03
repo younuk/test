@@ -19,6 +19,8 @@
 		 	<if test='targetYn == "N"'> AND p.psnnlbatchid IS NULL</if>
 		 	<if test="rankCodeId != null and rankCodeId != ''">AND U.rankCodeId = #{rankCodeId}</if>
 		 	<if test="specialDutyCodeId != null and specialDutyCodeId != ''">AND U.specialDutyCodeId = #{specialDutyCodeId}</if>
+            <if test="srchStartDt != null and srchStartDt !=''">AND U.ppmntbatch  &gt;= #{srchStartDt}</if>
+            <if test="srchEndDt != null and srchEndDt != ''">   AND U.ppmntbatch  &lt;= #{srchEndDt}</if>
 		 </where>
 	</sql>
 	<!--

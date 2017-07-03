@@ -152,7 +152,7 @@ public class PsnnlServiceImpl implements PsnnlService{
     }
 
     @Override
-    public List<ApplyOrgnz> selectApplOrgnzList(Psnnl paramVo) {
-        return mapper.selectApplOrgnzList(paramVo);
+    public List<ApplyOrgnz> selectApplOrgnzDisstsList(Psnnl paramVo) {
+        return mapper.selectApplOrgnzDisstsList(paramVo);
     }
 }

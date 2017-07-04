@@ -30,4 +30,6 @@ public interface PsnnlBatchMapper {
     PsnnlBatch selectRunPsnnlBatch();
 
     int countHopeOrgnzCheck(String param);
+
+    int updateTargetPsnnlNum(PsnnlBatch paramVo);
 }

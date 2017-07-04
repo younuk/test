@@ -241,7 +241,7 @@
                                      AND rankcodeid = (SELECT p2.rankcodeid FROM psnnl p2 WHERE p2.psnnlbatchid = #{value} AND p2.userid = p.userid)
                                  )
             WHERE psnnlbatchid = #{psnnlBatchId}
-              AND NVL(disstsflevel, 0.00000) = 0.00000
+              AND NVL(disstsflevel, '') = ''
     </update>
 
     <select id="selectBatchSpecialDutyCnt" resultType="Integer" parameterType="String">
@@ -528,5 +528,18 @@
          WHERE p.psnnlbatchid = #{value}
            AND p.orgnzid IS not NULL
     </insert>
+
+    <delete id="deletePsnnlBatch">
+        DELETE
+          FROM psnnl
+         WHERE psnnlId in (SELECT psnnlId
+                             FROM (select * from psnnl where psnnlbatchid = #{psnnlBatchId}) p
+                            INNER JOIN [user] u
+                               ON p.userid = u.userid
+                              AND p.orgnzid = u.orgnzid
+                              AND p.rankcodeid = u.rankcodeid
+                            )
+            OR orgnzid IS NULL
+    </delete>
 
 </mapper>

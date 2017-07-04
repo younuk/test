@@ -112,6 +112,8 @@ public class PsnnlServiceImpl implements PsnnlService{
         pbVo.setInEndDt("");
         pbVo.setDt(paramVo.getPpmntBatch());
         pbVo.setStatCodeId("PST006");
+        pbVo.setTargetNum("1");
+        pbVo.setPsnnlNum("1");
         pbMapper.insert(pbVo);
 
         paramVo.setPsnnlBatchId(pbVo.getPsnnlBatchId());
@@ -140,7 +142,7 @@ public class PsnnlServiceImpl implements PsnnlService{
         paramMap.put("rankcodeid", paramVo.getRankCodeId());
         paramMap.put("orgnzchangeyn", orgnzChangeYn);
         paramMap.put("rankchangyn", rankChangYn);
-        System.out.println(paramMap);
+
         if(paramVo.getPpmntBatch().equals(DateUtil.getDate("YYYY-MM-dd"))){
             //4-1. user update
             eMapper.updateUserPsnnl(paramMap);
@@ -148,6 +150,7 @@ public class PsnnlServiceImpl implements PsnnlService{
             //4-2. schedule insert
             mapper.insertSchedule(paramMap);
         }
+
         return rtn;
     }
 

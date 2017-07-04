@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.ac.ut.eHr.common.DateUtil;
+import kr.ac.ut.eHr.common.StringUtil;
 import kr.ac.ut.eHr.domain.Code;
 import kr.ac.ut.eHr.domain.Psnnl;
 import kr.ac.ut.eHr.domain.PsnnlBatch;
@@ -55,6 +56,8 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
     @Override
     @Transactional
     public int insert(PsnnlBatch paramVo) {
+        paramVo.setTargetNum("0");
+        paramVo.setPsnnlNum("0");
         mapper.insert(paramVo);
 
         if (paramVo.getStatCodeId().equals("PST002")) {
@@ -135,6 +138,10 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
 
         //5. 인사대상자 아닌사람의 희망관서삭제
         pMapper.deleteApplOrgnzNoTarget(paramVo.getPsnnlBatchId());
+
+        //6. 인사대상자수 update
+        mapper.updateTargetPsnnlNum(paramVo);
+
     }
 
     @Transactional
@@ -200,6 +207,7 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
             }
         }
 
+        // 2-3. 1순위에서 16순위까지 불만족지수로 줄세워서 기관 to 갯수만큼 배치 - 현관서잔류여부 무시
         for (int idx = 1; idx <= 16; idx++) {
             paramMap.put("level", idx);
             paramMap.put("staylevelyn", "");
@@ -219,26 +227,40 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
 
         // 3. 합격선 저장
         pMapper.updateBatchPassScore(paramVo.getPsnnlBatchId());
+
+        // 4. 실제발령자수 update
+        mapper.updateTargetPsnnlNum(paramVo);
     }
 
     @Transactional
     private void setPsnnl(PsnnlBatch paramVo) {
+        // 0. 인사 발령 전, psnnl 에서 삭제될 대상자 선정하여 삭제 - orgnzid is null 이거나, 기관/계급 변동 없는 사람
+        pMapper.deletePsnnlBatch(paramVo.getPsnnlBatchId());
+
         // 1. 인사실행완료된 대상자 선택
         List<Map<String, Object>> pList = pMapper.selectPsnnlUserList(paramVo.getPsnnlBatchId());
 
         boolean todayYn = (paramVo.getDt().equals(DateUtil.getDate("yyyy-MM-dd")));
         User vo = null;
+        List<Integer> exceptUserList = new ArrayList<Integer>();
         for (Map<String, Object> map : pList) {
-            vo = new User();
-            // 2. 현재 인사정보(max(startDt))에 종료일(enddt) 설정 (2,3 순서 바뀌면 안됨)
-            vo.setPpmntBatch((String)map.get("ppmntBatch"));
-            vo.setUserId(Integer.toString((Integer)map.get("userid")));
-            vo.setPsnnlBatchId(paramVo.getPsnnlBatchId());
-            pMapper.updateEnddt(vo);
+            //2-1. 기관/계급 안바뀌었으면 인사제외대상자 array에 add
+            if(StringUtil.NVL((String)map.get("orgnzChangeYn")).equals("N") && StringUtil.NVL((String)map.get("rankChangYn")).equals("N")){
+                exceptUserList.add((Integer)map.get("userid"));
+            }else{
+                vo = new User();
+                // 2-2-1. 현재 인사정보(max(startDt))에 종료일(enddt) 설정 (2,3 순서 바뀌면 안됨)
+                vo.setPpmntBatch((String)map.get("ppmntBatch"));
+                vo.setUserId(Integer.toString((Integer)map.get("userid")));
+                vo.setPsnnlBatchId(paramVo.getPsnnlBatchId());
+                pMapper.updateEnddt(vo);
 
-            if(todayYn)
-                eMapper.updateUserPsnnl(map);
+                // 2-2-2. 인사일이 오늘이면 user 정보 update
+                if(todayYn)
+                    eMapper.updateUserPsnnl(map);
+            }
         }
+
 
         // 4. schedule insert
         if(!todayYn)

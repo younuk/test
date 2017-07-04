@@ -66,4 +66,6 @@ public interface PsnnlMapper {
 
     int insertSchedule(Map<String, Object> paramMap);
     int insertSelectSchedule(String param);
+
+    int deletePsnnlBatch(@Param("psnnlBatchId") String psnnlBatchId);
 }

@@ -31,18 +31,20 @@
 	</header>
 	<main id="container">
 		<h2>탈락관서 순위내 합격선</h2>
-		<div id="contents">
+		<div id="contents" style="min-height: 433px;">
 			<table class="table">
 					<colgroup>
-						<col class="w30p" />
-						<col class="w40p" />
-						<col class="w30p" />
+						<col class="w25p" />
+						<col class="w25p" />
+						<col class="w25p" />
+						<col class="w25p" />
 					</colgroup>
 					<thead>
 						<tr>
-							<th scope="col">희망지순위</th>
+							<th scope="col">희망순위</th>
 							<th scope="col">관서명</th>
 							<th scope="col">합격선</th>
+							<th scope="col">합격순위</th>
 						</tr>
 					</thead>
 					<tbody class="tbody popTable">
@@ -51,6 +53,7 @@
 							<td>${result.level } 희망지</td>
 							<td>${result.orgnzName}</td>
 							<td>${result.passScore}</td>
+							<td>${result.orgnzRank}</td>
 						</tr>
 						</c:forEach>
 					</tbody>

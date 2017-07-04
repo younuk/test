@@ -28,7 +28,7 @@ $(document).ready(function(){
 			<ul class="clearfix">
 				<li>홈</li>
 				<li class="actived">통계</li>
-				<li class="actived">관서별 전출입 인원 현황</li>
+				<li class="actived">전출입 인원 형황</li>
 			</ul>
 		</div>
 	</header>

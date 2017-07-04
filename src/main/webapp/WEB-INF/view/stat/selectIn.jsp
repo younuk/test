@@ -30,7 +30,7 @@ $(document).ready(function(){
 			<ul class="clearfix">
 				<li>홈</li>
 				<li class="actived">통계</li>
-				<li class="actived">소방서별 전입 기준 지수</li>
+				<li class="actived">전입 지수 현황</li>
 			</ul>
 		</div>
 	</header>

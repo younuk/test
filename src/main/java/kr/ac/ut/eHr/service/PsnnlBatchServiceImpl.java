@@ -234,28 +234,28 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
 
     @Transactional
     private void setPsnnl(PsnnlBatch paramVo) {
-        // 0. 인사 발령 전, psnnl 에서 삭제될 대상자 선정하여 삭제 - orgnzid is null 이거나, 기관/계급 변동 없는 사람
+        // 1. 인사 발령 전, psnnl 에서 삭제될 대상자 선정하여 삭제 - orgnzid is null 이거나, 기관/계급 변동 없는 사람
         pMapper.deletePsnnlBatch(paramVo.getPsnnlBatchId());
 
-        // 1. 인사실행완료된 대상자 선택
+        // 2. 인사실행완료된 대상자 선택
         List<Map<String, Object>> pList = pMapper.selectPsnnlUserList(paramVo.getPsnnlBatchId());
 
         boolean todayYn = (paramVo.getDt().equals(DateUtil.getDate("yyyy-MM-dd")));
         User vo = null;
         List<Integer> exceptUserList = new ArrayList<Integer>();
         for (Map<String, Object> map : pList) {
-            //2-1. 기관/계급 안바뀌었으면 인사제외대상자 array에 add
+            //3-1. 기관/계급 안바뀌었으면 인사제외대상자 array에 add
             if(StringUtil.NVL((String)map.get("orgnzChangeYn")).equals("N") && StringUtil.NVL((String)map.get("rankChangYn")).equals("N")){
                 exceptUserList.add((Integer)map.get("userid"));
             }else{
                 vo = new User();
-                // 2-2-1. 현재 인사정보(max(startDt))에 종료일(enddt) 설정 (2,3 순서 바뀌면 안됨)
+                // 3-2-1. 현재 인사정보(max(startDt))에 종료일(enddt) 설정 (2,3 순서 바뀌면 안됨)
                 vo.setPpmntBatch((String)map.get("ppmntBatch"));
                 vo.setUserId(Integer.toString((Integer)map.get("userid")));
                 vo.setPsnnlBatchId(paramVo.getPsnnlBatchId());
                 pMapper.updateEnddt(vo);
 
-                // 2-2-2. 인사일이 오늘이면 user 정보 update
+                // 3-2-2. 인사일이 오늘이면 user 정보 update
                 if(todayYn)
                     eMapper.updateUserPsnnl(map);
             }

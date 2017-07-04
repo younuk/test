@@ -421,6 +421,7 @@
              , AO."level"
              , O.name AS orgnzName
              , AO.passScore
+             , p2.orgnzrank
           FROM (SELECT *
                   FROM apply_orgnz
                  WHERE userId = #{userId}
@@ -433,6 +434,11 @@
                         AND psnnlBatchId = #{psnnlBatchId}) P
             ON AO.userId = P.userid
            AND AO.psnnlBatchId = P.psnnlBatchId
+         INNER JOIN (SELECT orgnzid, MAX(orgnzrank) AS orgnzrank
+                           FROM psnnl
+                          WHERE psnnlBatchId = '9999'
+                          GROUP BY orgnzid) p2
+            ON AO.orgnzid = p2.orgnzid
          WHERE AO."level" &lt; P.orgnzRank
 
          ORDER BY AO."level"

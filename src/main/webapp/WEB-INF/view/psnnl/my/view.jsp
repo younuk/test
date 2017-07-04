@@ -248,7 +248,12 @@ function makeStayOptions(){
 									${status.index +1} 순위 :  <c:out value="${psnnlVo.hopeOrgnz[status.index].orgnzName}"/>
 									<br/>
 								</c:if>
-						</c:forEach>
+							</c:forEach>
+							</td>
+						</tr>
+						<tr>
+							<th>현관서 잔류 우선 여부</th>
+							<td colspan=3><c:out value="${psnnlVo.stayYn}"/><c:if test="${psnnlVo.stayYn eq 'Y'}">(${psnnlVo.stayLevel}순위)</c:if>
 						</c:if>
 					</td>
 				</tr>

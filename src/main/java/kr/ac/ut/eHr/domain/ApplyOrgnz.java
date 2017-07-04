@@ -8,7 +8,15 @@ public class ApplyOrgnz {
     private String stayLevl;
     private int months;
 
-	public int getMonths() {
+    private String orgnzRank;
+
+	public String getOrgnzRank() {
+        return orgnzRank;
+    }
+    public void setOrgnzRank(String orgnzRank) {
+        this.orgnzRank = orgnzRank;
+    }
+    public int getMonths() {
         return months;
     }
     public void setMonths(int months) {

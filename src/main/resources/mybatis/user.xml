@@ -453,7 +453,9 @@
                                      FROM psnnl
                                     WHERE psnnlid = (SELECT MAX(psnnlid) FROM psnnl WHERE userid = #{userId} AND psnnlbatchid &lt;> #{psnnlBatchId})) p
                             INNER JOIN orgnz o
-                               ON p.orgnzid = o.orgnzid) ex_p
+                               ON p.orgnzid = o.orgnzid
+                            INNER JOIN (SELECT * FROM code WHERE catecodeid = 'RNK' AND useyn = 'Y') c
+                               ON p.rankcodeid = c.codeid        ) ex_p
             ON u.userid = ex_p.userid
      </select>
      <select id="selectMaxPsnnlBatchId" parameterType="ArrayList" resultType="User">

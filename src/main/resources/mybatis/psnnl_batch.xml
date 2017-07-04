@@ -21,14 +21,10 @@
 		SELECT PB.psnnlbatchid
 			 , PB.degree
 			 , PB.dt
-			 , NVL(P.cnt, 0) as targetnum
+			 , PB.targetNum
 			 , PB.statCodeId
-			 , NVL(P.psnnlNum, 0) as psnnlNum
+			 , PB.psnnlNum
 		  FROM psnnl_batch PB
-          LEFT OUTER JOIN (SELECT psnnlBatchId, count(1) cnt, SUM(IF(orgnzid IS NOT NULL, 1, 0)) AS psnnlNum
-                             FROM psnnl
-                            GROUP BY psnnlBatchId) P
-            ON P.psnnlBatchId = PB.psnnlbatchid
          <include refid="sqlSearch"></include>
 
 		 ORDER BY PB.psnnlbatchid DESC
@@ -161,9 +157,13 @@
 
     <update id="updateTargetPsnnlNum" parameterType="PsnnlBatch">
         UPDATE psnnl_batch
-           SET (targetNum, psnnlNum )= (SELECT count(1) AS cnt, SUM(IF(orgnzid IS NOT NULL, 1, 0)) AS psnnlNum
-                                          FROM psnnl
-                                         WHERE psnnlbatchid =  #{psnnlBatchId})
+           SET (targetNum, psnnlNum )= (SELECT count(1) AS targetNum
+                                             , SUM(IF(p.orgnzid IS NOT NULL AND u.userid IS NULL, 1, 0)) AS psnnlNum
+                                          FROM (SELECT userid, orgnzid, rankcodeid FROM psnnl WHERE psnnlbatchid = #{psnnlBatchId}) p
+                                          LEFT OUTER JOIN [user] u
+                                            ON p.userid = u.userid
+                                           AND p.orgnzid = u.orgnzid
+                              			   AND p.rankcodeid = u.rankcodeid)
          WHERE psnnlbatchid =  #{psnnlBatchId}
     </update>
 </mapper>

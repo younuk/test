@@ -104,9 +104,9 @@ background-color: #0030ae;
 					<nav class="side_menu">
 						<h2 class="skip">좌측메뉴</h2>
 						<ul class="depth1_menu">
-							<li class="depth1_list"><a href="<c:url value='/stat/selectApply.do'/>" class="depth1_anchor">계급별,관서별,희망지별 현황</a></li>
-							<li class="depth1_list"><a href="<c:url value='/stat/selectIn.do'/>" class="depth1_anchor">소방서별 전입 기준 지수</a></li>
-							<li class="depth1_list"><a href="<c:url value='/stat/selectInOut.do'/>" class="depth1_anchor">관서별 전출입 인원 현황</a></li>
+							<li class="depth1_list"><a href="<c:url value='/stat/selectApply.do'/>" class="depth1_anchor">희망지 신청 현황</a></li>
+							<li class="depth1_list"><a href="<c:url value='/stat/selectIn.do'/>" class="depth1_anchor">전입 지수 현황</a></li>
+							<li class="depth1_list"><a href="<c:url value='/stat/selectInOut.do'/>" class="depth1_anchor">전출입 인원 형황</a></li>
 							<li class="depth1_list"><a href="<c:url value='/stat/selectAvg.do'/>" class="depth1_anchor">계급별 평균 지수점수</a></li>
 						</ul>
 					</nav>

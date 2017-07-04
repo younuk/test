@@ -10,7 +10,7 @@
 <script type="text/javascript">
 $(document).ready(function(){
 	cmmSetMenu("sideUserMng", 2);	//set menu
-	//cmmResultMsg("${result}");		//show result message
+	cmmResultMsg("${result}");		//show result message
 
 	//set calander
 	$(".calendar").datepicker(datepickerOption);

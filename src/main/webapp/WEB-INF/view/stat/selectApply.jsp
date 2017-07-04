@@ -28,7 +28,7 @@ $(document).ready(function(){
 			<ul class="clearfix">
 				<li>홈</li>
 				<li class="actived">통계</li>
-				<li class="actived">계급별,관서별,희망지별 현황</li>
+				<li class="actived">희망지 신청 현황</li>
 			</ul>
 		</div>
 	</header>

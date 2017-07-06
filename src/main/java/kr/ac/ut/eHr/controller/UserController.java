@@ -95,7 +95,7 @@ public class UserController {
 
 
     @RequestMapping(value = "/view.do")
-    public void view(@RequestParam(value="userId", required=false) String userId, ModelMap model) {
+    public void view(@RequestParam(value="userId", required=false) String userId, UserSearch searchVo, ModelMap model) {
         User vo = new User();
         PsnnlBatch pbVo = pbService.selectRunPsnnlBatch();
 
@@ -127,6 +127,7 @@ public class UserController {
         model.addAttribute("authCodeId", CommonUtil.setCodeCombo(codeService.selectList("ROL")));
         model.addAttribute("runBatchInfo", pbVo);
         model.addAttribute("userVo", vo);
+        model.addAttribute("userSearchVo", searchVo);
     }
 
     @RequestMapping(value = "/my/view.do")
@@ -140,15 +141,18 @@ public class UserController {
     }
 
     @RequestMapping(value="/add.do", method=RequestMethod.POST)
-    public String add(@ModelAttribute("userVo") User paramVo,  ModelMap model) {
+    @ResponseBody
+    public String add(@ModelAttribute("userVo") User paramVo)  throws IOException{
+        Map<String, Object> info = new HashMap<String, Object>();
         LoginDetail lvo= CommonUtil.getLoginDetail();
         boolean updPsnnlYn = (lvo.getUserAuth().equals("ROL001"))?true: false;
 
         int rtn = (paramVo.getUserId().equals(""))? service.insert(paramVo, updPsnnlYn): service.update(paramVo, updPsnnlYn);
 
-        model.addAttribute("result", (rtn > 0)? "success": "fail");
+        info.put("result", (rtn > 0)? "success": "fail");
 
-        return "user/view";
+        JsonUtil jsonUtil = new JsonUtil(info);
+        return jsonUtil.toJson();
     }
 
 

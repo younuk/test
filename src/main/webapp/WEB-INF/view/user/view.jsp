@@ -80,8 +80,19 @@ $(document).ready(function(){
 			});
 			if(!confirm(_REG_CONFIRM)){	return false;	}
 
-			document.userVo.action = "<c:url value='/user/add.do'/>";
-			document.userVo.submit();
+			//document.userVo.action = "<c:url value='/user/add.do'/>";
+			//document.userVo.submit();
+
+			$.post("<c:url value='/user/add.do'/>", $("#userVo").serialize(), "json")
+			.done(function(data) {
+				console.log(data);
+            	var result = JSON.parse(data)
+				if(result != null && result.result == "success"){
+					fnGoList();
+				}else{
+					alert(_REG_FAIL);
+				}
+            })
 		}
 	});
 
@@ -95,7 +106,7 @@ $(document).ready(function(){
 	});
 
 	$("#btnClose").click(function(){
-		location.href = "<c:url value='/user/list.do'/>";
+		fnGoList();
 	});
 
 	$("#btnPwdReset").click(function(){
@@ -113,61 +124,14 @@ $(document).ready(function(){
 	$("#btnDemand").click(function(){
 		window.open("<c:url value='/psnnl/popDemand.do'/>"+"?userId="+$("#userId").val(), "popDemandPopup", cmmPopup(550, 320));
 	});
-
-
-	$(".btnPlus").click(function(){
-		fnMakeDate($("#divHiddenInput .divAbs2F").clone(true), $("#divAbsResult"), $("#absStartDt"), $("#absEndDt"));
-	});
-	$(".btnPlus2").click(function(){
-		fnMakeDate($("#divHiddenInput .divDuty2F").clone(true), $("#divDutyResult"), $("#dutyStartDt"), $("#dutyEndDt"));
-	});
-
-	$(".btnMinus").click(function(){
-		$(this).parent().remove();
-	});
-
 	<sec:authorize access="hasAnyRole('ROL002')">
 		$("#authCodeId").attr("disabled", true);
 	</sec:authorize>
 });
 
-function fnMakeDate(newObj, tgtObj, pStart, pEnd){
-	var startDtVal = $(pStart).val();
-	var endDtVal = $(pEnd).val();
-	if(!startDtVal || !endDtVal){
-		alert("날짜 입력 안됨");
-		return false;
-	}
-	if(endDtVal < startDtVal){
-		alert("잘못된 날짜 입력");
-		return false;
-	}
-
-	var dtFail = false;
-	$(tgtObj).children().each(function(n){
-		var sDt = $(this).find("input:eq(0)").val();
-		var eDt = $(this).find("input:eq(1)").val();
-
-		if((startDtVal >= sDt && startDtVal <= eDt) || (endDtVal >= sDt && endDtVal <= eDt)){
-			alert("중복된 날짜 입력");
-			dtFail = true;
-			return false;
-		}
-	});
-
-	if(dtFail){
-		$(pStart).val("");
-		$(pEnd).val("");
-		return false;
-	}
-
-
-	$(newObj).find("input[name$=startDt]").val(startDtVal);
-	$(newObj).find("input[name$=endDt]").val(endDtVal);
-
-	$(tgtObj).append( $(newObj));
-	$(pStart).val("");
-	$(pEnd).val("");
+function fnGoList(){
+	document.userSearchVo.action = "<c:url value='/user/list.do'/>";
+	document.userSearchVo.submit();
 }
 
 </script>
@@ -228,51 +192,6 @@ function fnMakeDate(newObj, tgtObj, pStart, pEnd){
 					<th>특수직무/자격증</th>
 					<td colspan="3"><form:select path="specialDutyCodeId" items="${spcDutyCombo}"/></td>
 				</tr>
-				<%--
-				<tr>
-					<th>당해계급휴직일</th>
-					<td colspan="3">
-						<div id="divAbs1F">
-							<input type="text" id="absStartDt" size="11" class="calendar"/> - <input type="text" id="absEndDt" size="11" class="calendar"/>
-							<input type="button" value="+" class="btn btn_small btnPlus"/>
-						</div>
-						<div id="divAbsResult">
-							<c:if test="${not empty userVo.absences and userVo.absences ne null}">
-								<c:forEach var="result" items="${userVo.absences}" varStatus="status">
-									<div class="divAbs2F">
-								       <c:set var="startDtName">absences[${status.index}].startDt</c:set>
-		                               <c:set var="endDtName">absences[${status.index}].endDt</c:set>
-								       <form:input path="${startDtName}" size="11" readonly="true"/> - <form:input path="${endDtName }" size="11" readonly="true"/>
-								       <input type="button" value="-" class="btn btn_small2 btnMinus"/>
-								       <c:if test="${not status.last}"><br/></c:if>
-								    </div>
-							   </c:forEach>
-							</c:if>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<th>본부 및 학교 근무기간</th>
-					<td colspan="3">
-						<div id="divDuty1F">
-							<input type="text" id="dutyStartDt" size="11" class="calendar"/> - <input type="text" id="dutyEndDt" size="11" class="calendar"/>
-							<input type="button" value="+" class="btn btn_small btnPlus2"/>
-						</div>
-						<div id="divDutyResult">
-							<c:if test="${not empty userVo.dutyPeriods and userVo.dutyPeriods ne null }">
-								<c:forEach var="result" items="${userVo.dutyPeriods}" varStatus="status">
-					   				<div class="divDuty2F">
-                                       <c:set var="startDtName">dutyPeriods[${status.index}].startDt</c:set>
-                                       <c:set var="endDtName">dutyPeriods[${status.index}].endDt</c:set>
-                                       <form:input path="${startDtName}" size="11" readonly="true"/> - <form:input path="${endDtName }" size="11" readonly="true"/>
-                                       <input type="button" value="-" class="btn btn_small2 btnMinus"/>
-                                       <c:if test="${not status.last}"><br/></c:if>
-                                    </div>
-                                </c:forEach>
-                            </c:if>
-						</div>
-                    </td>
-				</tr> --%>
 				<tr>
 					<th>로그인 ID</th>
 					<td><form:input path="loginId"/><label for="loginId"></label></td>
@@ -346,6 +265,7 @@ function fnMakeDate(newObj, tgtObj, pStart, pEnd){
 					<input type="button" value="삭제" class="btn" id="btnDelete"/>
 				</c:if>
 			</c:if>
+			<input type="button" value="저장" class="btn" id="btnSave"/>
 			<input type="button" value="목록" class="btn" id="btnClose"/>
 		</div>
 
@@ -354,4 +274,14 @@ function fnMakeDate(newObj, tgtObj, pStart, pEnd){
 	<form:hidden path="psnnlBatchId" value="${runBatchInfo.psnnlBatchId}"/>
 	</form:form>
 </main>
+
+<form:form commandName="userSearchVo" name="userSearchVo" method="post" onsubmit="return false;">
+	<form:hidden path="orgnzId"/>
+	<form:hidden path="name"/>
+	<form:hidden path="loginId"/>
+	<form:hidden path="targetYn"/>
+	<form:hidden path="rankCodeId"/>
+	<form:hidden path="specialDutyCodeId"/>
+	<form:hidden path="srchStartDt"/>
+</form:form>
 <%@include file="../layout/footer.jsp"%>

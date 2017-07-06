@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.ac.ut.eHr.common.StringUtil;
 import kr.ac.ut.eHr.domain.Login;
 import kr.ac.ut.eHr.domain.Psnnl;
 import kr.ac.ut.eHr.domain.User;
@@ -89,7 +90,7 @@ public class UserServiceImpl implements UserService{
     @Transactional
     private void setPsnnl(User vo, boolean updPsnnlMnlYn) {
         if(updPsnnlMnlYn && !vo.getPsnnlBatchId().equals("")){
-            if(vo.getTargetCodeId().equals("") && vo.getPrmtCodeId().equals("")){
+            if(StringUtil.NVL(vo.getTargetCodeId()).equals("") && StringUtil.NVL(vo.getPrmtCodeId()).equals("")){
                 mapper.deletePsnnlManual(vo);
             }else{
                 mapper.mergePsnnlManual(vo);

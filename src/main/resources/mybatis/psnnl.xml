@@ -437,6 +437,8 @@
          INNER JOIN (SELECT orgnzid, MAX(orgnzrank) AS orgnzrank
                            FROM psnnl
                           WHERE psnnlBatchId = '9999'
+                          	AND NVL(psnnlresultdiv,'') = (select NVL(psnnlresultdiv,'') from psnnl where psnnlbatchid=9999 and userid=#{userId})
+                          	AND rankcodeid = (SELECT rankcodeid FROM psnnl WHERE psnnlbatchid=9999 AND userid=#{userId})
                           GROUP BY orgnzid) p2
             ON AO.orgnzid = p2.orgnzid
          WHERE AO."level" &lt; P.orgnzRank

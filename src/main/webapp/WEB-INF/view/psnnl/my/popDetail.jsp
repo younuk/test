@@ -30,7 +30,7 @@
 		<h1 class="skip">충청남도소방본부 Chungnam Fire serverice Headpuarter 소방공무원 인사배치 시스템</h1>
 	</header>
 	<main id="container">
-		<h2>탈락관서 순위내 합격선</h2>
+		<h2>본인이 탈락한 상위 희망지 지수 커트라인</h2>
 		<div id="contents" style="min-height: 433px;">
 			<table class="table">
 					<colgroup>
@@ -43,8 +43,8 @@
 						<tr>
 							<th scope="col">희망순위</th>
 							<th scope="col">관서명</th>
-							<th scope="col">합격선</th>
-							<th scope="col">합격순위</th>
+							<th scope="col">커트라인</th>
+							<th scope="col">마감순위</th>
 						</tr>
 					</thead>
 					<tbody class="tbody popTable">
@@ -53,7 +53,7 @@
 							<td>${result.level } 희망지</td>
 							<td>${result.orgnzName}</td>
 							<td>${result.passScore}</td>
-							<td>${result.orgnzRank}</td>
+							<td>${result.orgnzRank}순위 마감</td>
 						</tr>
 						</c:forEach>
 					</tbody>

@@ -432,11 +432,11 @@
      -->
 
      <select id="selectPopJang" parameterType="User" resultType="java.util.Map">
-        SELECT u.name AS username, o.name+'소방서' AS orgnzname, '지방'+c.codename AS rankname
+        SELECT u.name AS username, o.name AS orgnzname, '지방'+c.codename AS rankname
              , DATE_FORMAT(p.startdt, '%Y') AS dtyear
              , DATE_FORMAT(p.startdt, '%c') AS dtmonth
              , DATE_FORMAT(p.startdt, '%e') AS dtday
-             , ex_p.exorgnzname+'소방서' AS exorgnzname
+             , ex_p.exorgnzname AS exorgnzname
              , '지방'+ex_p.exrankname AS exrankname
              , IF(p.rankcodeid > ex_p.exrankcodeid, '(승진)', '') AS prmtname
              , IF(ex_p.userid IS null, '(신규임용)', '') AS newname

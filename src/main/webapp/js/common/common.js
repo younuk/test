@@ -328,3 +328,12 @@ function cmmCallAjax(paramUrl, paramData){
     });
 	return rtnObj;
 }
+
+function cmmAjaxRtn(data){
+	var result = JSON.parse(data)
+	if(result != null && result.result == "success"){
+		fnGoList();
+	}else{
+		alert(_REG_FAIL);
+	}
+}

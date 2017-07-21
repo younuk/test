@@ -40,12 +40,14 @@ $(document).ready(function(){
 		});
 		if(!validYn || !confirm(_REG_CONFIRM)){	return false;	}
 
-		document.psnnlVo.action = "<c:url value='/psnnl/my/add.do'/>";
-		document.psnnlVo.submit();
+		$.post("<c:url value='/psnnl/my/add.do'/>", $("#psnnlVo").serialize(), "json")
+		.done(function(data) {
+			cmmAjaxRtn(data);
+        });
 	});
 
 	$("#btnClose").click(function(){
-		location.href = "<c:url value='/psnnl/my/list.do'/>";
+		fnGoList();
 	});
 
 	$("select[name^=hopeOrgnz]").change(function(n){
@@ -76,7 +78,6 @@ $(document).ready(function(){
 		var orgnzCnt = Number("${fn:length(orgnzCombo)}");
 		for(var idx = 0; idx < orgnzCnt-1; idx++){
 			var temp = $("#hopeOrgnz"+idx).attr("selmnl");
-			console.log(temp );
 			$("#hopeOrgnz"+idx).val(temp);
 			$("#hopeOrgnz"+idx).trigger("change");
 		}
@@ -84,7 +85,6 @@ $(document).ready(function(){
 
 
 	$("#stay5Yn1").change(function(){
-		console.log($(this).is(":checked"));
 		if($(this).is(":checked"))
 			$("#spanHope").hide();
 		else
@@ -111,8 +111,8 @@ $(document).ready(function(){
 	}else{
 		$("#spanStay").hide();
 	}
-
 });
+
 function makeStayOptions(){
 	var nowOrgnz = $("#orgnzId").val();
 	var idx;
@@ -134,6 +134,11 @@ function makeStayOptions(){
 	for(var i=1; i<= (idx-2); i++){
 		$("#stayLevel").append("<option value='"+i+"'>"+i+" 순위</option>")
 	}
+}
+
+function fnGoList(){
+	document.psnnlSearchVo.action = "<c:url value='/psnnl/my/list.do'/>";
+	document.psnnlSearchVo.submit();
 }
 
 </script>
@@ -273,4 +278,11 @@ function makeStayOptions(){
 	<form:hidden path="startDt"/>
 	</form:form>
 </main>
+
+<form:form commandName="psnnlSearchVo" name="psnnlSearchVo" method="post" onsubmit="return false;">
+	<form:hidden path="divCodeId"/>
+	<form:hidden path="srchStartDt"/>
+	<form:hidden path="srchEndDt"/>
+	<form:hidden path="srchOrgnzId"/>
+</form:form>
 <jsp:include page="../../layout/footer.jsp" />

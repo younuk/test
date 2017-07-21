@@ -12,13 +12,10 @@ $(document).ready(function(){
 	cmmSetMenu("sideUserMng", 2);	//set menu
 	cmmResultMsg("${result}");		//show result message
 
-	//set calander
-	$(".calendar").datepicker(datepickerOption);
-
-
 	var statCodeVal = "${psnnlBatchVo.statCodeId}";
 	if(statCodeVal != "" && statCodeVal != "PST001"){
 		$("#psnnlBatchVo input").attr("readonly", true);
+		$(".calendar").datepicker("disable");
 	}
 	$("#btnSave").click(function(){
 
@@ -52,20 +49,25 @@ $(document).ready(function(){
 
 		if($("#psnnlBatchVo").valid()) {
 			if(!confirm(_REG_CONFIRM)) return false;
-			document.psnnlBatchVo.action = "<c:url value='/batch/add.do'/>";
-			document.psnnlBatchVo.submit();
+
+			$.post("<c:url value='/batch/add.do'/>", $("#psnnlBatchVo").serialize(), "json")
+			.done(function(data) {
+				cmmAjaxRtn(data);
+	        });
 		}
 	});
 
 	$("#btnDelete").click(function(){
 		if(!confirm(_DEL_CONFIRM)) return false;
 
-		document.psnnlBatchVo.action = "<c:url value='/batch/delete.do'/>";
-		document.psnnlBatchVo.submit();
+		$.post("<c:url value='/batch/delete.do'/>", $("#psnnlBatchVo").serialize(), "json")
+		.done(function(data) {
+			cmmAjaxRtn(data);
+        });
 	});
 
 	$("#btnClose").click(function(){
-		location.href = "<c:url value='/batch/list.do'/>";
+		fnGoList();
 	});
 
 	$("#dt").change(function(n){
@@ -96,6 +98,10 @@ $(document).ready(function(){
 	});
 });
 
+function fnGoList(){
+	document.psnnlSearchVo.action = "<c:url value='/batch/list.do'/>";
+	document.psnnlSearchVo.submit();
+}
 
 </script>
 <style>
@@ -212,4 +218,11 @@ $(document).ready(function(){
 	<form:hidden path="psnnlBatchId"/>
 	</form:form>
 </main>
+
+<form:form commandName="psnnlSearchVo" name="psnnlSearchVo" method="post" onsubmit="return false;">
+	<form:hidden path="srchStartDt"/>
+	<form:hidden path="srchEndDt"/>
+	<form:hidden path="srchState"/>
+</form:form>
+
 <%@include file="../layout/footer.jsp"%>

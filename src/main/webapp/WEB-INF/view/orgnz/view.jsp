@@ -26,18 +26,18 @@ $(document).ready(function(){
 		});
 
 		if($("#orgnzVo").valid()) {
-
 			var oldHopeYn = "${orgnzVo.applOrgnzYn}";
 			var newHopeYn = ($("input[name=applOrgnzYn]").is(":checked"))? "Y": "N";
 			var confirmMsg = _REG_CONFIRM;
 			if(oldHopeYn != ""  && oldHopeYn != newHopeYn){
 				confirmMsg += "\n\n주의 ! 희망관서등록여부가 변경되었습니다.";
 			}
+			if(!confirm(confirmMsg)) return false;
 
-			if(!confirm(confirmMsg)){	return false;	}
-
-			document.orgnzVo.action = "<c:url value='/orgnz/add.do'/>";
-			document.orgnzVo.submit();
+			$.post("<c:url value='/orgnz/add.do'/>", $("#orgnzVo").serialize(), "json")
+			.done(function(data) {
+				cmmAjaxRtn(data);
+            });
 		}
 	});
 
@@ -46,13 +46,14 @@ $(document).ready(function(){
 		confirmMsg +=  "\n\n주의 ! 해당관서 구급대원정보 및 인사정도 모두 삭제 됩니다.";
 		if(!confirm(confirmMsg)) return false;
 
-		document.orgnzVo.action = "<c:url value='/orgnz/delete.do'/>";
-		document.orgnzVo.submit();
+		$.post("<c:url value='/orgnz/delete.do'/>", $("#orgnzVo").serialize(), "json")
+		.done(function(data) {
+			cmmAjaxRtn(data);
+        });
 	});
 
 	$("#btnClose").click(function(){
-		document.orgnzVo.action = "<c:url value='/orgnz/list.do'/>";
-		document.orgnzVo.submit();
+		fnGoList();
 	});
 
 	$("#totPsb").text(sumTot("Psb"));
@@ -80,6 +81,12 @@ function sumTot(paramDiv){
 
 	return tot;
 }
+
+function fnGoList(){
+	document.orgnzSearchVo.action = "<c:url value='/orgnz/list.do'/>";
+	document.orgnzSearchVo.submit();
+}
+
 </script>
 <main class="colgroup">
 	<header class="sub_head">
@@ -126,51 +133,51 @@ function sumTot(paramDiv){
 			<tbody class="text_left">
 				<tr class="trAutoSum">
 					<th>소방사</th>
-					<td><form:input path="dept1Nrm"/></td>
-					<td><form:input path="dept1Vcc"/></td>
-					<td><input type="text" id="dept1Psb" value="${orgnzVo.dept1Nrm - orgnzVo.dept1Vcc}" readonly="readonly" size="8"/>(auto gen)</td>
+					<td><form:input path="dept1Nrm" size="7"/></td>
+					<td><form:input path="dept1Vcc" size="7"/></td>
+					<td><input type="text" id="dept1Psb" value="${orgnzVo.dept1Nrm - orgnzVo.dept1Vcc}" readonly="readonly" size="7"/>(auto gen)</td>
 					<td>${orgnzVo.dept1Now}</td>
 				</tr>
 				<tr class="trAutoSum">
 					<th>소방교</th>
-					<td><form:input path="dept2Nrm"/></td>
-					<td><form:input path="dept2Vcc"/></td>
-					<td><input type="text" id="dept2Psb" value="${orgnzVo.dept2Nrm - orgnzVo.dept2Vcc}" readonly="readonly" size="8"/>(auto gen)</td>
+					<td><form:input path="dept2Nrm" size="7"/></td>
+					<td><form:input path="dept2Vcc" size="7"/></td>
+					<td><input type="text" id="dept2Psb" value="${orgnzVo.dept2Nrm - orgnzVo.dept2Vcc}" readonly="readonly" size="7"/>(auto gen)</td>
 					<td>${orgnzVo.dept2Now}</td>
 				</tr>
 				<tr class="trAutoSum">
 					<th>소방장</th>
-					<td><form:input path="dept3Nrm"/></td>
-					<td><form:input path="dept3Vcc"/></td>
-					<td><input type="text" id="dept3Psb" value="${orgnzVo.dept3Nrm - orgnzVo.dept3Vcc}" readonly="readonly" size="8"/>(auto gen)</td>
+					<td><form:input path="dept3Nrm" size="7"/></td>
+					<td><form:input path="dept3Vcc" size="7"/></td>
+					<td><input type="text" id="dept3Psb" value="${orgnzVo.dept3Nrm - orgnzVo.dept3Vcc}" readonly="readonly" size="7"/>(auto gen)</td>
 					<td>${orgnzVo.dept3Now}</td>
 				</tr>
 				<tr class="trAutoSum">
 					<th>소방위</th>
-					<td><form:input path="dept4Nrm"/></td>
-					<td><form:input path="dept4Vcc"/></td>
-					<td><input type="text" id="dept4Psb" value="${orgnzVo.dept4Nrm - orgnzVo.dept4Vcc}" readonly="readonly" size="8"/>(auto gen)</td>
+					<td><form:input path="dept4Nrm" size="7"/></td>
+					<td><form:input path="dept4Vcc" size="7"/></td>
+					<td><input type="text" id="dept4Psb" value="${orgnzVo.dept4Nrm - orgnzVo.dept4Vcc}" readonly="readonly" size="7"/>(auto gen)</td>
 					<td>${orgnzVo.dept4Now}</td>
 				</tr>
 				<tr class="trAutoSum">
 					<th>소방경</th>
-					<td><form:input path="dept5Nrm"/></td>
-					<td><form:input path="dept5Vcc"/></td>
-					<td><input type="text" id="dept5Psb" value="${orgnzVo.dept5Nrm - orgnzVo.dept5Vcc}" readonly="readonly" size="8"/>(auto gen)</td>
+					<td><form:input path="dept5Nrm" size="7"/></td>
+					<td><form:input path="dept5Vcc" size="7"/></td>
+					<td><input type="text" id="dept5Psb" value="${orgnzVo.dept5Nrm - orgnzVo.dept5Vcc}" readonly="readonly" size="7"/>(auto gen)</td>
 					<td>${orgnzVo.dept5Now}</td>
 				</tr>
 				<tr>
 					<th>소방령</th>
-					<td><form:input path="dept6Nrm"/></td>
-					<td><form:input path="dept6Vcc"/></td>
-					<td><input type="text" id="dept6Psb" value="0" readonly="readonly" size="8"/>(fix)</td>
+					<td><form:input path="dept6Nrm" size="7"/></td>
+					<td><form:input path="dept6Vcc" size="7"/></td>
+					<td><input type="text" id="dept6Psb" value="0" readonly="readonly" size="7"/>(fix)</td>
 					<td>${orgnzVo.dept6Now}</td>
 				</tr>
 				<tr>
 					<th>소방정</th>
-					<td><form:input path="dept7Nrm"/></td>
-					<td><form:input path="dept7Vcc"/></td>
-					<td><input type="text" id="dept7Psb" value="0" readonly="readonly" size="8"/>(fix)</td>
+					<td><form:input path="dept7Nrm" size="7"/></td>
+					<td><form:input path="dept7Vcc" size="7"/></td>
+					<td><input type="text" id="dept7Psb" value="0" readonly="readonly" size="7"/>(fix)</td>
 					<td>${orgnzVo.dept7Now}</td>
 				</tr>
 				<tr>
@@ -210,4 +217,13 @@ function sumTot(paramDiv){
 	<form:hidden path="orgnzId"/>
 	</form:form>
 </main>
+<form:form commandName="orgnzSearchVo" name="orgnzSearchVo" method="post" onsubmit="return false;">
+	<form:hidden path="srchOrgnzId"/>
+	<form:hidden path="srchNrmCntStart"/>
+	<form:hidden path="srchNrmCntEnd"/>
+	<form:hidden path="srchNowCntStart"/>
+	<form:hidden path="srchNowCntEnd"/>
+	<form:hidden path="srchVccCntStart"/>
+	<form:hidden path="srchVccCntEnd"/>
+</form:form>
 <%@include file="../layout/footer.jsp"%>

@@ -62,13 +62,13 @@ function fnPage(pageNo){
 						<th scope="col">관서명</th>
 						<td><form:select path="srchOrgnzId" items="${orgnzCombo}"/></td>
 						<th scope="col">정원</th>
-						<td><form:input path="srchNrmCntStart" class="w10p"/>~<form:input path="srchNrmCntEnd" class="w10p"/></td>
+						<td><form:input path="srchNrmCntStart" class="w15p"/> ~ <form:input path="srchNrmCntEnd" class="w15p"/></td>
 					</tr>
 					<tr>
 						<th scope="col">배치가능인원</th>
-						<td><form:input path="srchNowCntStart" class="w10p"/>~<form:input path="srchNowCntEnd" class="w10p"/></td>
+						<td><form:input path="srchNowCntStart" class="w15p"/> ~ <form:input path="srchNowCntEnd" class="w15p"/></td>
 						<th scope="col">강제결원</th>
-						<td><form:input path="srchVccCntStart" class="w10p"/>~<form:input path="srchVccCntEnd" class="w10p"/></td>
+						<td><form:input path="srchVccCntStart" class="w15p"/> ~ <form:input path="srchVccCntEnd" class="w15p"/></td>
 					</tr>
 				</tbody>
 			</table>

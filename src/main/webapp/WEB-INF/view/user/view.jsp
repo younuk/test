@@ -14,6 +14,7 @@ $(document).ready(function(){
 	if(!$("#psnnlBatchId").val()){
 		$(".userInfo input").attr("readonly", true);
 		$(".userInfo select").attr("disabled", true);
+		$(".calendar").datepicker("disable");
 		$("#btnSave").hide();
 	}
 
@@ -24,6 +25,7 @@ $(document).ready(function(){
 
 	var loginId = "${userVo.loginId}";
 	$("#btnSave").click(function(){
+		alert("test");
 		var dupYn = false;
 		if(loginId != $("#loginId").val()){
 			var data = cmmCallAjax("<c:url value='/user/checkLoginId.do'/>", {loginId:$("#loginId").val(), userId:$("#userId").val()});
@@ -78,21 +80,15 @@ $(document).ready(function(){
 				$(this).find("input:eq(0)").attr("name", "absences["+n+"].startDt");
 				$(this).find("input:eq(1)").attr("name", "absences["+n+"].endDt");
 			});
-			if(!confirm(_REG_CONFIRM)){	return false;	}
+			if(!confirm(_REG_CONFIRM)) return false;
 
 			//document.userVo.action = "<c:url value='/user/add.do'/>";
 			//document.userVo.submit();
 
 			$.post("<c:url value='/user/add.do'/>", $("#userVo").serialize(), "json")
 			.done(function(data) {
-				console.log(data);
-            	var result = JSON.parse(data)
-				if(result != null && result.result == "success"){
-					fnGoList();
-				}else{
-					alert(_REG_FAIL);
-				}
-            })
+				cmmAjaxRtn(data);
+            });
 		}
 	});
 
@@ -101,8 +97,10 @@ $(document).ready(function(){
 		confirmMsg +=  "\n\n주의 ! 해당구급대원정보 및 인사정도 모두 삭제 됩니다.";
 		if(!confirm(confirmMsg)) return false;
 
-		document.userVo.action = "<c:url value='/user/delete.do'/>";
-		document.userVo.submit();
+		$.post("<c:url value='/user/delete.do'/>", $("#userVo").serialize(), "json")
+		.done(function(data) {
+			cmmAjaxRtn(data);
+        });
 	});
 
 	$("#btnClose").click(function(){
@@ -265,7 +263,7 @@ function fnGoList(){
 					<input type="button" value="삭제" class="btn" id="btnDelete"/>
 				</c:if>
 			</c:if>
-			<input type="button" value="저장" class="btn" id="btnSave"/>
+			<!-- <input type="button" value="저장" class="btn" id="btnSave"/> -->
 			<input type="button" value="목록" class="btn" id="btnClose"/>
 		</div>
 
@@ -283,5 +281,6 @@ function fnGoList(){
 	<form:hidden path="rankCodeId"/>
 	<form:hidden path="specialDutyCodeId"/>
 	<form:hidden path="srchStartDt"/>
+	<form:hidden path="srchEndDt"/>
 </form:form>
 <%@include file="../layout/footer.jsp"%>

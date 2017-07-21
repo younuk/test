@@ -143,25 +143,21 @@ public class UserController {
     @RequestMapping(value="/add.do", method=RequestMethod.POST)
     @ResponseBody
     public String add(@ModelAttribute("userVo") User paramVo)  throws IOException{
-        Map<String, Object> info = new HashMap<String, Object>();
         LoginDetail lvo= CommonUtil.getLoginDetail();
         boolean updPsnnlYn = (lvo.getUserAuth().equals("ROL001"))?true: false;
 
         int rtn = (paramVo.getUserId().equals(""))? service.insert(paramVo, updPsnnlYn): service.update(paramVo, updPsnnlYn);
 
-        info.put("result", (rtn > 0)? "success": "fail");
-
-        JsonUtil jsonUtil = new JsonUtil(info);
-        return jsonUtil.toJson();
+        return CommonUtil.makeRtnJson(rtn);
     }
 
 
     @RequestMapping(value="/delete.do", method=RequestMethod.POST)
-    public String delete(@ModelAttribute("userVo") User paramVo, ModelMap model) {
-        String userId = paramVo.getUserId();
-        model.addAttribute("result", (service.delete(userId) > 0)? "success": "fail");
+    @ResponseBody
+    public String delete(@ModelAttribute("userVo") User paramVo) throws IOException {
+        int rtn = service.delete(paramVo.getUserId());
 
-        return "user/view";
+        return CommonUtil.makeRtnJson(rtn);
     }
 
     @RequestMapping(value="/checkLoginId.do", method=RequestMethod.POST)

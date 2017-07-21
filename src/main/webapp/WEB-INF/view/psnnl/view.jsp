@@ -15,8 +15,7 @@ $(document).ready(function(){
 	}
 
 	$("#btnClose").click(function(){
-		document.psnnlVo.action = "<c:url value='/psnnl/list.do'/>";
-		document.psnnlVo.submit();
+		fnGoList();
 	});
 
 	$("select[name^=hopeOrgnz]").change(function(n){
@@ -66,6 +65,11 @@ function makeStayOptions(){
 	for(var i=idx+2; i<=totIdx; i++){
 		$("#stayLevel").append("<option value='"+i+"'>"+i+" 순위</option>")
 	}
+}
+
+function fnGoList(){
+	document.psnnlSearchVo.action = "<c:url value='/psnnl/list.do'/>";
+	document.psnnlSearchVo.submit();
 }
 
 </script>
@@ -177,4 +181,12 @@ function makeStayOptions(){
 	<form:hidden path="name"/>
 	</form:form>
 </main>
+
+<form:form commandName="psnnlSearchVo" name="psnnlSearchVo" method="post" onsubmit="return false;">
+	<form:hidden path="divCodeId"/>
+	<form:hidden path="srchStartDt"/>
+	<form:hidden path="srchEndDt"/>
+	<form:hidden path="srchOrgnzId"/>
+</form:form>
+
 <jsp:include page="../layout/footer.jsp" />

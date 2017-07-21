@@ -49,7 +49,7 @@ public class PsnnlBatchController {
     }
 
     @RequestMapping(value = "/view.do")
-    public void view(@RequestParam(value="psnnlBatchId", required=false) String psnnlBatchId, ModelMap model) {
+    public void view(@RequestParam(value="psnnlBatchId", required=false) String psnnlBatchId, PsnnlBatch searchVo, ModelMap model) {
         PsnnlBatch vo = new PsnnlBatch();
 
         if(!StringUtil.NVL(psnnlBatchId).equals("")){
@@ -67,25 +67,27 @@ public class PsnnlBatchController {
         //model.addAttribute("divCodeCombo", CommonUtil.setCodeCombo(codeService.selectList("PDV")));
         model.addAttribute("stateCombo", CommonUtil.setCodeCombo(cList, false));
         model.addAttribute("psnnlBatchVo", vo);
+        model.addAttribute("psnnlSearchVo", searchVo);
     }
 
     @RequestMapping(value="/add.do", method=RequestMethod.POST)
-    public String add(@ModelAttribute("psnnlBatchVo") PsnnlBatch paramVo, ModelMap model) {
-        int rtn = 0;
+    @ResponseBody
+    public String add(@ModelAttribute("psnnlBatchVo") PsnnlBatch paramVo) throws IOException {
         //인사차수 재설정
         paramVo.setDegree(paramVo.getDt().substring(0, 4)+"-"+ paramVo.getDegree());
         paramVo.setStatCodeId(StringUtil.NVL(paramVo.getStatCodeId(), "PST001"));
 
-        rtn = (paramVo.getPsnnlBatchId().equals(""))? service.insert(paramVo): service.update(paramVo);
+        int rtn = (paramVo.getPsnnlBatchId().equals(""))? service.insert(paramVo): service.update(paramVo);
 
-        model.addAttribute("result", (rtn > 0)? "success": "fail");
-        return "batch/view";
+        return CommonUtil.makeRtnJson(rtn);
     }
 
     @RequestMapping(value="/delete.do", method=RequestMethod.POST)
-    public String delete(@ModelAttribute("psnnlBatchVo") PsnnlBatch paramVo, ModelMap model) {
-        model.addAttribute("result", (service.delete(paramVo.getPsnnlBatchId()) > 0)? "success": "fail");
-        return "batch/view";
+    @ResponseBody
+    public String delete(@ModelAttribute("psnnlBatchVo") PsnnlBatch paramVo, ModelMap model) throws IOException {
+        int rtn = service.delete(paramVo.getPsnnlBatchId());
+
+        return CommonUtil.makeRtnJson(rtn);
     }
 
     @RequestMapping(value="/checkInProgress.do", method=RequestMethod.POST)

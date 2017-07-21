@@ -76,9 +76,9 @@ function fnPage(pageNo){
 			<table class="table">
                  <colgroup>
                      <col class="w20p" />
-                     <col class="w30p" />
+                     <col class="w25p" />
                      <col class="w20p" />
-                     <col class="w30p" />
+                     <col class="w35p" />
                  </colgroup>
                  <tbody class="text_left">
                      <tr>

@@ -56,17 +56,18 @@ public class PsnnlController {
     }
 
     @RequestMapping(value = {"/view.do", "/my/view.do"})
-    public void view(@RequestParam(value="psnnlId", required=false) String psnnlId, ModelMap model) {
+    public void view(@RequestParam(value="psnnlId", required=false) String psnnlId, PsnnlSearch searchVo, ModelMap model) {
         model.addAttribute("psnnlVo", service.select(psnnlId));
         model.addAttribute("orgnzCombo", CommonUtil.setCodeCombo(orgnzService.selectComboList("Y")));
+        model.addAttribute("psnnlSearchVo", searchVo);
     }
 
     @RequestMapping(value="/my/add.do", method=RequestMethod.POST)
-    public String add(@ModelAttribute("psnnlVo") Psnnl paramVo, ModelMap model) {
+    @ResponseBody
+    public String add(@ModelAttribute("psnnlVo") Psnnl paramVo) throws IOException {
         int rtn = service.update(paramVo);
-        model.addAttribute("result", (rtn > 0)? "success": "fail");
 
-        return "/psnnl/my/view";
+        return CommonUtil.makeRtnJson(rtn);
     }
 
     @RequestMapping(value = "/my/popDetail.do")

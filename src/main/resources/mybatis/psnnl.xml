@@ -157,7 +157,7 @@
            <!-- AND (NVL(stay5yearstartdt, '') = '' OR ((stay5yn = 'Y' AND ppmntbatch &lt;= ADDDATE(SYSDATE, INTERVAL -5 year))) ) -->
            AND NOW() NOT BETWEEN NVL(stay5yearstartdt, ADDDATE(NOW(), 1)) AND ADDDATE(stay5yearstartdt, INTERVAL +5 year)
            AND userid NOT IN (SELECT userid FROM psnnl_manual WHERE psnnlbatchid = #{psnnlBatchId})
-           AND orgnzid in (SELECT orgnzid FROM orgnz WHERE applorgnzyn= 'Y')
+           AND orgnzid in (SELECT orgnzid FROM orgnz WHERE applorgnzyn = 'Y')
          UNION ALL
         SELECT #{psnnlBatchId} as psnnlBatchId, #{dt} as startDt, pm.userid
              , CASE WHEN prmtcodeid LIKE  'PMT'||'%'
@@ -210,6 +210,23 @@
     </update>
 
     <!-- ======================================================================= -->
+    <update id="updateBatchPointMonths" parameterType="String">
+        UPDATE psnnl p
+           SET (p.initpoint, p.initmonth) = (SELECT CAST(ROUND(c.codename * p2.moths/(p2.moths+5)*p2.moths, 5) as numeric(10,5)) AS initpoint, p2.moths AS initmonth
+                                               FROM (SELECT orgnzrank, startdt, TO_NUMBER(TRUNC(MONTHS_BETWEEN(ADDDATE(TO_DATE(#{dt}, 'yyyy-mm-dd'), 1), startdt))) AS moths
+                                                       FROM psnnl
+                                                      WHERE psnnlid = p.psnnlid
+                                                     ) p2
+                                              INNER JOIN (SELECT * FROM code WHERE catecodeid = 'PRM' AND useyn = 'Y') c
+                                                 ON p2.orgnzrank = c.sortno
+                                             )
+        WHERE p.psnnlid IN (SELECT MAX(psnnlid)
+							  FROM psnnl p2
+							 WHERE p2.psnnlbatchid &lt; #{psnnlBatchId}
+                               AND p2.rankcodeid = p.rankcodeid
+							 GROUP BY userid
+							 )
+    </update>
 
     <update id="updateBatchBefore" parameterType="String">
             UPDATE psnnl p
@@ -217,7 +234,7 @@
                  , orgnzid = null
                  , orgnzrank = null
                  , psnnlresultdiv = decode(psnnlresultdiv, 'M', 'M', 'N', 'N', null)
-                 , disstsflevel = (SELECT MAX(disstsflevel) FROM psnnl p2 where p.userid = p2.userid GROUP BY userid)
+                 <!-- , disstsflevel = (SELECT MAX(disstsflevel) FROM psnnl p2 where p.userid = p2.userid GROUP BY userid) -->
                  <!-- , disstsflevel = (SELECT TO_CHAR(ROUND(SUM(orgnzMon)/(SUM(months)+5), 5))
                                      FROM (SELECT TO_CHAR(NVL(months, 0) * codename) orgnzMon, months
                                              FROM apply_orgnz ao
@@ -229,20 +246,39 @@
                                               AND ao.psnnlBatchId = #{psnnlBatchId}
                                             )
                                     ) -->
+                 , disstsflevel = (SELECT SUM(initpoint*initmonth) / SUM(initmonth)
+                                    FROM psnnl p2
+                                   WHERE p2.psnnlbatchid &lt; #{psnnlBatchId}
+                                     AND p2.initpoint IS NOT NULL
+                                     AND p2.userid = p.userid
+                                     AND p2.rankcodeid = p.rankcodeid
+                                    )
              WHERE psnnlbatchid = #{psnnlBatchId}
     </update>
 
     <update id="updateBatchBefore2" parameterType="String">
+        UPDATE psnnl p
+           SET disstsflevel = 0
+         WHERE psnnlbatchid = #{psnnlBatchId}
+           AND userid IN (SELECT userid
+       		 			    FROM psnnl_manual
+        				   WHERE psnnlbatchid = #{psnnlBatchId}
+        					 AND targetyn = 'Y'
+        					 AND prmtcodeid IS NOT NULL)
+    </update>
+
+    <update id="updateBatchBefore3" parameterType="String">
             UPDATE psnnl p
               SET disstsflevel = (SELECT TO_CHAR(ROUND(AVG(disstsflevel)*0.8, 5))
                                     FROM psnnl
                                    WHERE psnnlbatchid = #{psnnlBatchId}
-                                     AND NVL(disstsflevel, '') != ''
+                                     AND NVL(disstsflevel, 0) != 0
                                      AND rankcodeid = (SELECT p2.rankcodeid FROM psnnl p2 WHERE p2.psnnlbatchid = #{value} AND p2.userid = p.userid)
                                  )
             WHERE psnnlbatchid = #{psnnlBatchId}
               AND NVL(disstsflevel, '') = ''
     </update>
+
 
     <select id="selectBatchSpecialDutyCnt" resultType="Integer" parameterType="String">
         SELECT NVL(SUM(special), 0)
@@ -318,7 +354,11 @@
                                  ON c.catecodeid = 'RNK'
                                 AND c.useyn = 'Y'
                             ) o
-                       LEFT OUTER JOIN (SELECT orgnzid, rankcodeid, COUNT(1) AS cnt FROM psnnl WHERE psnnlbatchid = #{psnnlBatchId} and orgnzid IS NOT NULL GROUP BY orgnzid, rankcodeid) p
+                       LEFT OUTER JOIN (SELECT orgnzid, rankcodeid, COUNT(1) AS cnt
+                                          FROM psnnl
+                                         WHERE psnnlbatchid = #{psnnlBatchId}
+                                           AND orgnzid IS NOT NULL
+                                         GROUP BY orgnzid, rankcodeid) p
                          ON o.orgnzid = p.orgnzid
                         AND o.codeid = p.rankcodeid
                       WHERE nrmTotal > NVL(cnt, 0)
@@ -436,9 +476,9 @@
            AND AO.psnnlBatchId = P.psnnlBatchId
          INNER JOIN (SELECT orgnzid, MAX(orgnzrank) AS orgnzrank
                            FROM psnnl
-                          WHERE psnnlBatchId = '9999'
-                          	AND NVL(psnnlresultdiv,'') = (select NVL(psnnlresultdiv,'') from psnnl where psnnlbatchid=9999 and userid=#{userId})
-                          	AND rankcodeid = (SELECT rankcodeid FROM psnnl WHERE psnnlbatchid=9999 AND userid=#{userId})
+                          WHERE psnnlBatchId = #{psnnlBatchId}
+                          	AND NVL(psnnlresultdiv,'') = (select NVL(psnnlresultdiv,'') from psnnl where psnnlbatchid= #{psnnlBatchId} and userid=#{userId})
+                          	AND rankcodeid = (SELECT rankcodeid FROM psnnl WHERE psnnlbatchid= #{psnnlBatchId} AND userid=#{userId})
                           GROUP BY orgnzid) p2
             ON AO.orgnzid = p2.orgnzid
          WHERE AO."level" &lt; P.orgnzRank

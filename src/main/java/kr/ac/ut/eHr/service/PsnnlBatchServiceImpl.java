@@ -124,11 +124,6 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
         }
 
         if (tgtList != null && tgtList.size() > 0) {
-            /*
-             * List<Psnnl> tgtList2 = new ArrayList<Psnnl>(); for(Psnnl pVo:
-             * tgtList){ pVo.setStartDt(paramVo.getDt()); tgtList2.add(pVo); }
-             */
-
             //3. 대상자 insert
             pMapper.insertAll(tgtList);
 
@@ -141,7 +136,6 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
 
         //6. 인사대상자수 update
         mapper.updateTargetPsnnlNum(paramVo);
-
     }
 
     @Transactional
@@ -149,20 +143,22 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
         List<Psnnl> orgList = new ArrayList<Psnnl>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
-        // 1. 배치실행 전, psnnl orgnzid/orgnzrank null처리 and 불만족지수 계산
+        //1. 불만족지수 계산 전,initpoint/initmonth 계산
+        pMapper.updateBatchPointMonths(paramVo.getDt(), paramVo.getPsnnlBatchId());
+
+
+        // 2. 배치실행 전, psnnl orgnzid/orgnzrank null처리 and 불만족지수 계산
         pMapper.updateBatchBefore(paramVo.getPsnnlBatchId());
-        // 1-1.  배치이력없는사람은 평균값으로 불문족지수 update
+
+        // 2-1.  불만족지수  : 승진자는 0
         pMapper.updateBatchBefore2(paramVo.getPsnnlBatchId());
 
-        // 2-1. 툭수직무 우선 배치
+        // 2-2.  불만족지수  : 배치이력없는사람은 평균값으로 update
+        pMapper.updateBatchBefore3(paramVo.getPsnnlBatchId());
+
+        // 3-1. 툭수직무 우선 배치
         paramMap.put("psnnlBatchId", paramVo.getPsnnlBatchId());
 
-
-
-        //List<Orgnz> oList = oMapper.selectComboList("Y");
-        //for(Orgnz oVo: oList){
-        //Orgnz oVo = new Orgnz();
-        //oVo.setOrgnzId("79");
         for (int jdx = 1; jdx <= 16; jdx++) {
             int specialDutyCnt = pMapper.selectBatchSpecialDutyCnt("");
             Psnnl pVo = null;
@@ -188,7 +184,7 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
             }
         }
 
-        // 2-2. 1순위에서 16순위까지 불만족지수로 줄세워서 기관 to 갯수만큼 배치
+        // 3-2. 1순위에서 16순위까지 불만족지수로 줄세워서 기관 to 갯수만큼 배치
         for (int idx = 1; idx <= 16; idx++) {
             paramMap.put("level", idx);
             paramMap.put("staylevelyn", "Y");
@@ -207,7 +203,7 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
             }
         }
 
-        // 2-3. 1순위에서 16순위까지 불만족지수로 줄세워서 기관 to 갯수만큼 배치 - 현관서잔류여부 무시
+        // 3-3. 1순위에서 16순위까지 불만족지수로 줄세워서 기관 to 갯수만큼 배치 - 현관서잔류여부 무시
         for (int idx = 1; idx <= 16; idx++) {
             paramMap.put("level", idx);
             paramMap.put("staylevelyn", "");
@@ -225,17 +221,17 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
             }
         }
 
-        // 3. 합격선 저장
+        // 4. 합격선 저장
         pMapper.updateBatchPassScore(paramVo.getPsnnlBatchId());
 
-        // 4. 실제발령자수 update
+        // 5. 실제발령자수 update
         mapper.updateTargetPsnnlNum(paramVo);
     }
 
     @Transactional
     private void setPsnnl(PsnnlBatch paramVo) {
         // 1. 인사 발령 전, psnnl 에서 삭제될 대상자 선정하여 삭제 - orgnzid is null 이거나, 기관/계급 변동 없는 사람
-        pMapper.deletePsnnlBatch(paramVo.getPsnnlBatchId());
+        //pMapper.deletePsnnlBatch(paramVo.getPsnnlBatchId());
 
         // 2. 인사실행완료된 대상자 선택
         List<Map<String, Object>> pList = pMapper.selectPsnnlUserList(paramVo.getPsnnlBatchId());
@@ -261,7 +257,6 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
             }
         }
 
-
         // 4. schedule insert
         if(!todayYn)
             pMapper.insertSelectSchedule(paramVo.getPsnnlBatchId());
@@ -271,7 +266,6 @@ public class PsnnlBatchServiceImpl implements PsnnlBatchService {
     public int countHopeOrgnzCheck(String param){
         return mapper.countHopeOrgnzCheck(param);
     }
-
 }
 
 

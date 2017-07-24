@@ -14,7 +14,7 @@ $(document).ready(function(){
 	if(!$("#psnnlBatchId").val()){
 		$(".userInfo input").attr("readonly", true);
 		$(".userInfo select").attr("disabled", true);
-		$(".calendar").datepicker("disable");
+		//$(".calendar").datepicker("disable");
 		$("#btnSave").hide();
 	}
 

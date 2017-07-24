@@ -15,7 +15,7 @@ $(document).ready(function(){
 	var statCodeVal = "${psnnlBatchVo.statCodeId}";
 	if(statCodeVal != "" && statCodeVal != "PST001"){
 		$("#psnnlBatchVo input").attr("readonly", true);
-		$(".calendar").datepicker("disable");
+		//$(".calendar").datepicker("disable");
 	}
 	$("#btnSave").click(function(){
 
@@ -24,10 +24,10 @@ $(document).ready(function(){
 
 		if($("#statCodeId").val() == "PST004" || $("#statCodeId").val() == "PST005"){
 			var rtnObj = cmmCallAjax("/batch/checkHopeIn.do", {psnnlBatchId:$("#psnnlBatchId").val()});
-			if(rtnObj != null && rtnObj.result =="fail"){
+			/* if(rtnObj != null && rtnObj.result =="fail"){
 				alert("희망관서입력이 완료되지 않았습니다.");
 				return false;
-			}
+			} */
 		}
 
 		$("#psnnlBatchVo").validate({

@@ -479,7 +479,7 @@
                             AND rnk.codename IS NOT NULL
                             AND rol.codename IS NOT NULL
                             AND o.orgnzid IS NOT NULL
-                            AND spc.codename IS NOT NULL THEN o.orgnzid
+                            AND decode(#{specialDutyCodeId}, '', '', spc.codename) IS NOT NULL THEN o.orgnzid
           ELSE null END rtn1
         FROM (SELECT #{loginId} AS loginid, #{rankCodeId} AS rnk, #{authCodeId} AS rol, #{orgnzId} AS org, #{specialDutyCodeId} as spc
                     FROM db_root ) dr

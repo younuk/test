@@ -31,9 +31,11 @@ public interface PsnnlMapper {
     int insertAll(List<Psnnl> paramList);
     int updateTargetManual(String param);
 
-    //배치실행
+    //배치실행전 불만족지수
+    int updateBatchPointMonths(@Param("dt") String dt, @Param("psnnlBatchId") String psnnlBatchId);
     int updateBatchBefore(String param);
     int updateBatchBefore2(String param);
+    int updateBatchBefore3(String param);
 
     int selectBatchSpecialDutyCnt(String param);
     // List<Psnnl> selectBatchSpecialDuty(Map<String, Object> paramMap);
